@@ -43,7 +43,7 @@ jobs:
           echo "End lint..."
   run-smart-contract-testing:
     runs-on: ubuntu-latest
-    needs: run-quantity-client
+    needs: run-quantity-code-client
     steps:
       - name: checkout
         uses: actions/checkout@v3
