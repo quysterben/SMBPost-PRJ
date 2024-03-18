@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  client:
+    build: 
+      context: client
+      dockerfile: Dockerfile
+    container_name: client
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app/client
+      - /app/client/node_modules
+    restart: always
+    env_file:
+      - ./client/.env
+    networks:
+      - smbpost_network
+    depends_on:
+      - server
+  server:
+    restart: always
+    build: 
+      context: server
+      dockerfile: Dockerfile
+    container_name: server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app/server
+      - /app/server/node_modules
+    env_file:
+      - ./server/.env
+    networks:
+      - smbpost_network
+    expose:
+      - 3000
+networks:
+  smbpost_network:
