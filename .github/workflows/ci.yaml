@@ -1,0 +1,22 @@
+name: Continuous Integration
+run-name: Continuous Integration
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  run-quantity-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          echo "Start install dependencies..."
+          yarn
+          echo "End install dependencies..."
+      - name: Checking code convention
+        run: |
+          echo "Start lint..."
+          yarn lint
+          echo "End lint..."

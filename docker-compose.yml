@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  node-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: node-server
+    ports:
+      - ${PORT}:9900
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - .env
+    networks:
+      - backend
+networks:
+  backend:
+    external: false
