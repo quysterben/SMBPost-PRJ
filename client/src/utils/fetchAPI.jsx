@@ -42,7 +42,7 @@ export default function requestApi(endpoint, method, body, responseType = 'json'
             throw new Error('Refresh token not found');
           }
           const result = await instance.post(
-            `${BASEURL}/auth/refresh-token`,
+            `${BASEURL}api/v1/auth/refresh-token`,
             {
               refresh_token: refreshToken
             },
@@ -76,7 +76,7 @@ export default function requestApi(endpoint, method, body, responseType = 'json'
 
   return instance.request({
     method: method,
-    url: `${BASEURL}${endpoint}`,
+    url: `${BASEURL}api/v1/${endpoint}`,
     data: body,
     responseType: responseType
   });

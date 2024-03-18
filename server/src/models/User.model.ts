@@ -9,8 +9,8 @@ const User = mongoose.model(
       password: String,
       role: {
         type: String,
-        enum: ['user', 'admin'],
-        default: 'user'
+        enum: ['shippingCenter', 'admin', 'storehouse', 'customer'],
+        default: 'customer'
       }
     },
     {

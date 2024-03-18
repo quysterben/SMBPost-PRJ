@@ -1,15 +1,18 @@
-import NotFound from '../pages/NotFound';
-import Dashboard from '../pages/Dashboard';
-import Login from '../pages/Login';
+import NotFound from '../pages/Common/NotFound';
+import Login from '../pages/Common/Login';
 
 import DefaultLayout from '../layouts/DefaultLayout';
 
+import Management from '../pages/Admin/Management';
+
 const publicRoutes = [
-  { path: '/dashboard', component: Dashboard, layout: DefaultLayout },
   { path: '/login', component: Login, layout: null },
+
   { path: '*', component: NotFound, layout: null }
 ];
 
-const privateRoutes = [];
+const privateRoutes = [
+  { path: '/admin/dashboard', component: Management, layout: DefaultLayout, role: 'admin' }
+];
 
 export { publicRoutes, privateRoutes };
