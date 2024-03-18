@@ -1,11 +1,13 @@
 name: Continuous Integration
 run-name: Continuous Integration
 on:
+   push:
+    branches: [master]
   pull_request:
-    branches:
-      - master
+    types: [opened, synchronize, reopened]
+    branches: [master]
 jobs:
-  run-quantity-code:
+  run-quantity-code-server:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -13,10 +15,49 @@ jobs:
       - name: Install dependencies
         run: |
           echo "Start install dependencies..."
+          cd server
           yarn
           echo "End install dependencies..."
       - name: Checking code convention
         run: |
           echo "Start lint..."
+          cd server
           yarn lint
           echo "End lint..."
+  run-quantity-code-client:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          echo "Start install dependencies..."
+          cd client
+          npm i
+          echo "End install dependencies..."
+      - name: Checking code convention
+        run: |
+          echo "Start lint..."
+          cd client
+          npm run lint
+          echo "End lint..."
+  run-smart-contract-testing:
+    runs-on: ubuntu-latest
+    needs: run-quantity-client
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: Move to the contract's code directory
+        run: cd contract
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies"
+          cd contract
+          npm install
+          echo "Dependencies installed"
+      - name: Run test
+        run: |
+          echo "Running test"
+          cd contract
+          npx hardhat test
+          echo "Done"
