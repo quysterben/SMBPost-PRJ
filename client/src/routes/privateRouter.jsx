@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 export default function PrivateRouter({ children }) {
   const accessToken = localStorage.getItem('accessToken');
-  return accessToken ? children : <Navigate to="/" />;
+  return accessToken ? children : <Navigate to="/login" />;
 }
 
 PrivateRouter.propTypes = {
