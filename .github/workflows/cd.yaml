@@ -111,4 +111,4 @@ jobs:
           script: |
             docker ps -q --filter "name=smbpost-server" | grep -q . && docker stop smbpost-server
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/smbpost-server:${{ env.IMAGE_TAG }}
-            docker run -d -p 80:3000 --rm --name smbpost-server ${{ secrets.DOCKERHUB_USERNAME }}/smbpost-server:${{ env.IMAGE_TAG }}
+            docker run -d -p 5000:5000 --rm --name smbpost-server ${{ secrets.DOCKERHUB_USERNAME }}/smbpost-server:${{ env.IMAGE_TAG }}
