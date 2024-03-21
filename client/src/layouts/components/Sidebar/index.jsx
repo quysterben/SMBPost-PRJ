@@ -10,6 +10,8 @@ import GroupIcon from '@mui/icons-material/Group';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import LogoutIcon from '@mui/icons-material/Logout';
 
+import MetaMaskBtn from '../MetaMaskBtn';
+
 import requestApi from '../../../utils/fetchAPI';
 import Swal from 'sweetalert2';
 
@@ -55,17 +57,15 @@ export default function Sidebar() {
         sx={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-start',
+          justifyContent: 'center',
           mb: '20px',
           padding: 0,
           cursor: 'pointer'
         }}
       >
-        <img src={LOGO_URL} alt="logo" width="80px" height="80px" />
-        <Typography sx={{ fontWeight: '500', color: blue[600], fontSize: '20px' }}>
-          SmB Post
-        </Typography>
+        <img src={LOGO_URL} alt="logo" width="100px" height="100px" />
       </Container>
+      <MetaMaskBtn />
       <Container sx={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
         <Container
           sx={{
@@ -114,11 +114,6 @@ export default function Sidebar() {
         </Container>
       </Container>
       <Container>
-        <hr
-          style={{
-            color: 'gray'
-          }}
-        />
         <Button
           onClick={handleLogout}
           variant="outlined"

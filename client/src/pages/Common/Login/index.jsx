@@ -59,6 +59,7 @@ export default function Login() {
       localStorage.setItem('accessToken', res.data.accessToken);
       localStorage.setItem('userId', res.data.userId);
       localStorage.setItem('userRole', res.data.role);
+      localStorage.setItem('userName', res.data.username);
       Swal.fire({
         icon: 'success',
         title: 'Login success!'
