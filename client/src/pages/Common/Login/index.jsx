@@ -13,8 +13,7 @@ import { blueGrey } from '@mui/material/colors';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import Swal from 'sweetalert2';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -45,7 +44,10 @@ export default function Login() {
   const handleSubmitLogin = async (e) => {
     e.preventDefault();
     if (emailInput.current.value === '' || passwordInput.current.value === '') {
-      toast('Email or password is empty', { type: 'error' });
+      Swal.fire({
+        icon: 'error',
+        text: 'Please fill in all fields!'
+      });
       return;
     }
     try {
@@ -57,11 +59,19 @@ export default function Login() {
       localStorage.setItem('accessToken', res.data.accessToken);
       localStorage.setItem('userId', res.data.userId);
       localStorage.setItem('userRole', res.data.role);
+      Swal.fire({
+        icon: 'success',
+        title: 'Login success!'
+      });
       if (res.data.role === 'admin') {
         navigate('/admin/dashboard');
       }
     } catch (err) {
-      toast(err.response.data.message, { type: 'error' });
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: err.response.data.message
+      });
     }
     setIsLoading(false);
   };
@@ -78,7 +88,6 @@ export default function Login() {
         alignItems: 'center'
       }}
     >
-      <ToastContainer />
       <Container
         sx={{
           width: '500px',
