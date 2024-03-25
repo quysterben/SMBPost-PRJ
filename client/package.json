@@ -6,6 +6,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
     "@fontsource/roboto": "^5.0.12",
+    "@metamask/detect-provider": "^2.0.0",
     "@mui/icons-material": "^5.15.12",
     "@mui/lab": "^5.0.0-alpha.168",
     "@mui/material": "^5.15.12",
@@ -20,7 +21,8 @@
     "react-scripts": "5.0.1",
     "sweetalert2": "^11.10.6",
     "web-vitals": "^2.1.4",
-    "web3": "^4.6.0"
+    "web3": "^4.6.0",
+    "zustand": "^4.5.2"
   },
   "scripts": {
     "start": "react-scripts start",

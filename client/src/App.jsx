@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { privateRoutes, publicRoutes } from './routes';
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 
 import DefaultLayout from './layouts/DefaultLayout';
 
@@ -10,7 +10,56 @@ import ShippingRouter from './routes/shippingRouter';
 import StoreHouseRouter from './routes/storeHouseRouter';
 import CustomerRouter from './routes/customerRouter';
 
+import useContractHook from './hooks/useContractHook';
+
+import Web3 from 'web3';
+import detectEthereumProvider from '@metamask/detect-provider';
+import contractInfo from './utils/SMBPOST.json';
+import { ContractAddress } from './const';
+
 function App() {
+  const web3 = useContractHook((state) => state.web3);
+  const setContract = useContractHook((state) => state.setContract);
+  const setAccount = useContractHook((state) => state.setAccount);
+
+  useEffect(() => {
+    const loadProvider = async () => {
+      try {
+        const provider = await detectEthereumProvider();
+        const web3 = new Web3(provider);
+        const contract = new web3.eth.Contract(contractInfo.abi, ContractAddress);
+        if (provider) {
+          provider.on('accountsChanged', (accounts) => {
+            console.log(accounts);
+            setAccount(accounts[0]);
+          });
+
+          const data = {
+            contract,
+            provider,
+            web3
+          };
+
+          setContract(data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    loadProvider();
+  }, []);
+
+  useEffect(() => {
+    const getAccount = async () => {
+      const accounts = await web3.eth.getAccounts();
+      setAccount(accounts[0]);
+    };
+
+    if (web3) {
+      getAccount();
+    }
+  }, [web3]);
+
   return (
     <Router>
       <Routes>
