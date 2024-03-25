@@ -80,7 +80,7 @@ export default function Sidebar() {
           }}
         >
           <DashboardIcon />
-          <Typography sx={{ fontWeight: '500' }}>Dashboard</Typography>
+          <Typography sx={{ fontWeight: '500' }}>Overview</Typography>
         </Container>
         <Container
           sx={{

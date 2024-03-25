@@ -35,14 +35,14 @@ export default function requestApi(endpoint, method, body, responseType = 'json'
     },
     async (error) => {
       const originalConfig = error.config;
-      if (error.response && error.response.status === 419) {
+      if (error.response && error.response.status === 401) {
         try {
           const refreshToken = localStorage.getItem('refreshToken');
           if (!refreshToken) {
             throw new Error('Refresh token not found');
           }
           const result = await instance.post(
-            `${BASEURL}api/v1/auth/refresh-token`,
+            `${BASEURL}api/v1/auth/refresh_token`,
             {
               refresh_token: refreshToken
             },
