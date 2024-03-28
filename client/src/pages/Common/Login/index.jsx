@@ -65,7 +65,9 @@ export default function Login() {
         title: 'Login success!'
       });
       if (res.data.role === 'admin') {
-        navigate('/admin/management');
+        navigate('/admin/overview');
+      } else if (res.data.role === 'shippingCenter') {
+        navigate('/center/overview');
       }
     } catch (err) {
       Swal.fire({

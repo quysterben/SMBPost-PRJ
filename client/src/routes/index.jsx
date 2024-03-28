@@ -7,6 +7,8 @@ import Management from '../pages/Admin/Management';
 import UserDetail from '../pages/Admin/UserDetail';
 import Overview from '../pages/Admin/Overview';
 
+import CenterOverview from '../pages/ShippingCenter/Overview';
+
 const publicRoutes = [{ path: '/login', component: Login, layout: null }];
 
 const privateRoutes = [
@@ -19,7 +21,14 @@ const privateRoutes = [
     role: 'admin'
   },
   { path: '/admin/overview', component: Overview, layout: DefaultLayout, role: 'admin' },
+
   //   centerRoutes
+  {
+    path: '/center/overview',
+    component: CenterOverview,
+    layout: DefaultLayout,
+    role: 'shippingCenter'
+  },
 
   { path: '*', component: NotFound, layout: null }
 ];

@@ -9,6 +9,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import GroupIcon from '@mui/icons-material/Group';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import LogoutIcon from '@mui/icons-material/Logout';
+import VerifiedIcon from '@mui/icons-material/Verified';
 
 import MetaMaskBtn from '../MetaMaskBtn';
 
@@ -17,6 +18,8 @@ import Swal from 'sweetalert2';
 
 export default function Sidebar() {
   const navigate = useNavigate();
+
+  const currUserRole = localStorage.getItem('userRole');
 
   const handleLogout = async () => {
     try {
@@ -67,40 +70,64 @@ export default function Sidebar() {
       </Container>
       <MetaMaskBtn />
       <Container sx={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+        {currUserRole != 'customer' && (
+          <Container
+            onClick={() =>
+              navigate(
+                currUserRole === 'admin'
+                  ? '/admin/overview'
+                  : currUserRole == 'shippingCenter'
+                    ? '/center/overview'
+                    : currUserRole == 'storehouse'
+                      ? '/storehouse/overview'
+                      : '/customer/overview'
+              )
+            }
+            sx={{
+              width: '100%',
+              color: grey[600],
+              display: 'flex',
+              gap: '10px',
+              borderRadius: '8px',
+              padding: '10px 20px',
+              cursor: 'pointer',
+              ':hover': { color: blue[600], bgcolor: grey[200] }
+            }}
+          >
+            <DashboardIcon />
+            <Typography sx={{ fontWeight: '500' }}>Overview</Typography>
+          </Container>
+        )}
+        {currUserRole == 'admin' && (
+          <Container
+            onClick={() => navigate('/admin/management')}
+            sx={{
+              width: '100%',
+              color: grey[600],
+              display: 'flex',
+              borderRadius: '8px',
+              gap: '10px',
+              padding: '10px 20px',
+              cursor: 'pointer',
+              ':hover': { color: blue[600], bgcolor: grey[200] }
+            }}
+          >
+            <GroupIcon />
+            <Typography sx={{ fontWeight: '500' }}>Management</Typography>
+          </Container>
+        )}
         <Container
-          onClick={() => navigate('/admin/overview')}
-          sx={{
-            width: '100%',
-            color: grey[600],
-            display: 'flex',
-            gap: '10px',
-            borderRadius: '8px',
-            padding: '10px 20px',
-            cursor: 'pointer',
-            ':hover': { color: blue[600], bgcolor: grey[200] }
-          }}
-        >
-          <DashboardIcon />
-          <Typography sx={{ fontWeight: '500' }}>Overview</Typography>
-        </Container>
-        <Container
-          onClick={() => navigate('/admin/management')}
-          sx={{
-            width: '100%',
-            color: grey[600],
-            display: 'flex',
-            borderRadius: '8px',
-            gap: '10px',
-            padding: '10px 20px',
-            cursor: 'pointer',
-            ':hover': { color: blue[600], bgcolor: grey[200] }
-          }}
-        >
-          <GroupIcon />
-          <Typography sx={{ fontWeight: '500' }}>Management</Typography>
-        </Container>
-        <Container
-          onClick={() => navigate('/admin/orders')}
+          onClick={() =>
+            navigate(
+              currUserRole === 'admin'
+                ? '/admin/orders'
+                : currUserRole === 'shippingCenter'
+                  ? '/center/orders'
+                  : currUserRole == 'storehouse'
+                    ? '/storehouse/orders'
+                    : '/customer/orders'
+            )
+          }
           sx={{
             width: '100%',
             color: grey[600],
@@ -114,6 +141,22 @@ export default function Sidebar() {
         >
           <InventoryIcon />
           <Typography sx={{ fontWeight: '500' }}>Orders</Typography>
+        </Container>
+        <Container
+          onClick={() => navigate('/verify')}
+          sx={{
+            width: '100%',
+            color: grey[600],
+            display: 'flex',
+            borderRadius: '8px',
+            gap: '10px',
+            padding: '10px 20px',
+            cursor: 'pointer',
+            ':hover': { color: blue[600], bgcolor: grey[200] }
+          }}
+        >
+          <VerifiedIcon />
+          <Typography sx={{ fontWeight: '500' }}>Verify</Typography>
         </Container>
       </Container>
       <Container>

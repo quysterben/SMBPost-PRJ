@@ -56,6 +56,11 @@ class AuthController {
         err.statusCode = 404
         throw err
       }
+      if (user.isActive === false) {
+        const err: any = new Error('User is not active!')
+        err.statusCode = 400
+        throw err
+      }
 
       const isEqual = await bcryptjs.compare(password, user.password as string)
       if (!isEqual) {
