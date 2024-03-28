@@ -65,15 +65,16 @@ export default function Login() {
         title: 'Login success!'
       });
       if (res.data.role === 'admin') {
-        navigate('/admin/dashboard');
+        navigate('/admin/management');
       }
     } catch (err) {
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: err.response.data.message
+        text: err.response.data.message || "Email or password isn't correct!"
       });
     }
+
     setIsLoading(false);
   };
 

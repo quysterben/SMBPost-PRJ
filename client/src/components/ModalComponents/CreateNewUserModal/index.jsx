@@ -6,6 +6,10 @@ import Modal from '@mui/material/Modal';
 
 import { FormControl, InputLabel, OutlinedInput, Select, MenuItem, Container } from '@mui/material';
 
+import Swal from 'sweetalert2';
+
+import requestAPI from '../../../utils/fetchAPI';
+
 const style = {
   position: 'absolute',
   top: '50%',
@@ -14,17 +18,60 @@ const style = {
   width: 400,
   bgcolor: 'background.paper',
   boxShadow: 24,
-  p: 4
+  p: 4,
+  zIndex: 2
 };
 
 export default function CreateNewUserModal() {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setRole('');
+    usernameRef.current.value = '';
+    emailRef.current.value = '';
+    phoneRef.current.value = '';
+  };
 
   const [role, setRole] = React.useState('');
   const handleChange = (event) => {
     setRole(event.target.value);
+  };
+
+  const formRef = React.useRef(null);
+
+  const usernameRef = React.useRef(null);
+  const emailRef = React.useRef(null);
+  const phoneRef = React.useRef(null);
+  const addressRef = React.useRef(null);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const username = usernameRef.current.value;
+    const email = emailRef.current.value;
+    const phone = phoneRef.current.value;
+    const address = addressRef.current.value;
+
+    const data = {
+      username,
+      email,
+      phonenumber: phone,
+      address,
+      role
+    };
+
+    try {
+      const response = await requestAPI('user/create-user', 'POST', data);
+      console.log(response);
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: error.response.data.message,
+        target: formRef.current
+      });
+    }
   };
 
   return (
@@ -33,6 +80,7 @@ export default function CreateNewUserModal() {
         Create New User
       </Button>
       <Modal
+        ref={formRef}
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
@@ -50,10 +98,11 @@ export default function CreateNewUserModal() {
               flexDirection: 'column',
               gap: '20px'
             }}
+            onSubmit={handleSubmit}
           >
             <FormControl fullWidth>
               <InputLabel htmlFor="component-outlined">Username</InputLabel>
-              <OutlinedInput id="component-outlined" label="username" />
+              <OutlinedInput inputRef={usernameRef} id="component-outlined" label="username" />
             </FormControl>
             <FormControl fullWidth>
               <InputLabel id="demo-simple-select-label">Role</InputLabel>
@@ -64,25 +113,24 @@ export default function CreateNewUserModal() {
                 label="Role"
                 onChange={handleChange}
               >
-                <MenuItem value={10}>Customer</MenuItem>
-                <MenuItem value={20}>Shipping Center</MenuItem>
-                <MenuItem value={30}>Storehouse</MenuItem>
+                <MenuItem value={'shippingCenter'}>Shipping Center</MenuItem>
+                <MenuItem value={'storehouse'}>Storehouse</MenuItem>
               </Select>
             </FormControl>
             <FormControl fullWidth>
               <InputLabel htmlFor="component-outlined">Email</InputLabel>
-              <OutlinedInput id="component-outlined" label="email" />
+              <OutlinedInput inputRef={emailRef} id="component-outlined" label="email" />
             </FormControl>
             <FormControl fullWidth>
               <InputLabel htmlFor="component-outlined">Phone number</InputLabel>
-              <OutlinedInput id="component-outlined" label="phone-number" />
+              <OutlinedInput inputRef={phoneRef} id="component-outlined" label="phone-number" />
             </FormControl>
             <FormControl fullWidth>
               <InputLabel htmlFor="component-outlined">Address</InputLabel>
-              <OutlinedInput id="component-outlined" label="address" />
+              <OutlinedInput inputRef={addressRef} id="component-outlined" label="address" />
             </FormControl>
             <Container sx={{ display: 'flex', px: '0', gap: '8px' }}>
-              <Button variant="contained" color="primary" fullWidth>
+              <Button type="submit" variant="contained" color="primary" fullWidth>
                 Create
               </Button>
               <Button onClick={handleClose} variant="outlined" fullWidth>

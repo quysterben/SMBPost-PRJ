@@ -3,431 +3,488 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
-contract SMBPOST {
-    enum OrderStatus {
-        InTransit,
-        Delivered,
-        Cancelled
+contract FPIS {
+    struct Product {
+        string model;
+        string manufactoryEmail;
+        string retailerEmail;
+        string customerEmail;
+        string imageURL;
+        HistoryItem[] history;
     }
 
-    struct HistoryOrder {
+    struct HistoryItem {
         uint256 timestamp;
-        string date;
         string action;
-        string detail;
-        string imageURL;
+        string details;
+        string date;
     }
 
-    struct OrderWay {
-        string posName;
-        string posType;
-    }
-
-    struct Order {
-        string senderPhone;
-        string receiverPhone;
-        uint256 weight;
-        uint256 size;
-        uint256 deposit;
-        string note;
-        string imageURL;
-        OrderStatus status;
-        OrderWay[] ways;
-        HistoryOrder[] histories;
-    }
-
-    struct ShippingCenter {
-        string email;
+    struct Manufactory {
         string name;
-        string phoneNumber;
-        string pos;
+        string email;
     }
 
-    struct Storehouse {
-        string email;
+    struct Retailer {
         string name;
-        string phoneNumber;
-        string pos;
+        string email;
     }
 
     struct Customer {
-        string email;
         string name;
-        string pos;
-        string phoneNumber;
+        string email;
+        string[] products;
         bool isExist;
-        string[] receivedOrders;
-        string[] sentOrders;
     }
 
-    mapping(string => Order) private ordersList;
-    mapping(string => ShippingCenter) private shippingCentersList;
-    mapping(string => Storehouse) private storehousesList;
-    mapping(string => Customer) private customersList;
+    mapping(string => Product) private productList;
+    mapping(string => Manufactory) private manufactoryList;
+    mapping(string => Retailer) private retailerList;
+    mapping(string => Customer) private customerList;
 
-    string[] private orderIDs;
+    string[] private productIds;
 
     receive() external payable {}
 
-    function orderExists(string memory _orderID) public payable returns (bool) {
-        return bytes(ordersList[_orderID].senderPhone).length > 0;
+    function productExists(string memory _productID)
+        internal
+        view
+        returns (bool)
+    {
+        return bytes(productList[_productID].model).length > 0;
     }
 
-    function createOrder(
-        string memory _orderID,
-        string memory _shippingCenterEmail,
-        string memory _senderPhone,
-        string memory _receiverPhone,
-        string memory _note,
-        uint256 _size,
-        uint256 _weight,
-        uint256 _deposit,
-        string memory _imageURL,
-        string memory _requestDate
+    function createProduct(
+        string memory _productID,
+        string memory _model,
+        string memory _manufactoryEmail,
+        string memory _productionDate,
+        string memory _imageURL
     ) public payable returns (bool) {
         require(
-            bytes(customersList[_senderPhone].name).length > 0,
-            "Customer does not exist"
+            bytes(manufactoryList[_manufactoryEmail].name).length > 0,
+            "Manufactory does not exist"
         );
+        require(bytes(_productID).length > 0, "ProductID cannot be empty");
+        require(bytes(_model).length > 0, "Model cannot be empty");
         require(
-            bytes(customersList[_receiverPhone].name).length > 0,
-            "Customer does not exist"
-        );
-        require(bytes(_orderID).length > 0, "OrderID is required");
-        require(
-            !orderExists(_orderID),
-            "Order with the same ID already exists"
+            !productExists(_productID),
+            "Product with the same ID already exists"
         );
 
-        Order storage newOrder = ordersList[_orderID];
-        newOrder.senderPhone = _senderPhone;
-        newOrder.receiverPhone = _receiverPhone;
-        newOrder.imageURL = _imageURL;
-        newOrder.weight = _weight;
-        newOrder.size = _size;
-        newOrder.deposit = _deposit;
-        newOrder.note = _note;
+        Product storage newProduct = productList[_productID];
+        newProduct.model = _model;
+        newProduct.imageURL = _imageURL;
+        newProduct.manufactoryEmail = _manufactoryEmail;
 
-        OrderWay memory way;
-        way.posType = "ShippingCenter";
-        way.posName = shippingCentersList[_shippingCenterEmail].name;
-        newOrder.ways.push(way);
-
-        HistoryOrder memory history;
-        history.timestamp = block.timestamp;
-        history.action = "Requested";
-        history.detail = string(
-            abi.encodePacked("Shipping Center:", _shippingCenterEmail)
+        HistoryItem memory historyItem;
+        historyItem.timestamp = block.timestamp;
+        historyItem.action = "Manufactured";
+        historyItem.details = string(
+            abi.encodePacked("Manufactory Email: ", _manufactoryEmail)
         );
-        history.date = _requestDate;
-        newOrder.histories.push(history);
+        historyItem.date = _productionDate;
+        newProduct.history.push(historyItem);
 
-        ordersList[_orderID] = newOrder;
-        orderIDs.push(_orderID);
+        productList[_productID] = newProduct;
+        productIds.push(_productID);
 
         return true;
     }
 
-    function addOrderWay(
-        string memory _posType,
-        string memory _posName,
-        string memory _orderID
+    function moveToRetailer(
+        string memory _productID,
+        string memory _retailerEmail,
+        string memory _movingDate
     ) public payable returns (bool) {
-        OrderWay memory newWay;
-        newWay.posType = _posType;
-        newWay.posName = _posName;
+        Product storage product = productList[_productID];
 
-        ordersList[_orderID].ways.push(newWay);
+        require(productExists(_productID), "Product does not exist");
+        require(
+            bytes(retailerList[_retailerEmail].name).length > 0,
+            "Retailer does not exist"
+        );
+        require(
+            bytes(product.customerEmail).length == 0,
+            "Product is already sold"
+        );
+        require(bytes(_movingDate).length > 0, "Moving date cannot be empty");
+
+        product.retailerEmail = _retailerEmail;
+
+        HistoryItem memory historyItem;
+        historyItem.timestamp = block.timestamp;
+        historyItem.action = "Moved to Retailer";
+        historyItem.details = string(
+            abi.encodePacked("Retail Email: ", _retailerEmail)
+        );
+        historyItem.date = _movingDate;
+        product.history.push(historyItem);
 
         return true;
     }
 
-    function getOrderDetail(string memory _orderID)
+    function sellToCustomer(
+        string memory _productID,
+        string memory _retailerEmail,
+        string memory _customerEmail,
+        string memory _saleDate
+    ) public payable returns (bool) {
+        Product storage product = productList[_productID];
+
+        require(productExists(_productID), "Product does not exist");
+        require(
+            compareTwoStrings(product.retailerEmail, _retailerEmail),
+            "Retailer email does not match"
+        );
+        require(
+            bytes(product.customerEmail).length == 0,
+            "Product is already sold"
+        );
+        require(
+            customerList[_customerEmail].isExist,
+            "Customer does not exist"
+        );
+
+        product.customerEmail = _customerEmail;
+        customerList[_customerEmail].products.push(_productID);
+
+        HistoryItem memory historyItem;
+        historyItem.timestamp = block.timestamp;
+        historyItem.action = "Sold to Customer";
+        historyItem.details = string(
+            abi.encodePacked("Customer Email: ", _customerEmail)
+        );
+        historyItem.date = _saleDate;
+        product.history.push(historyItem);
+
+        return true;
+    }
+
+    function changeCustomer(
+        string memory _productID,
+        string memory _oldCustomerEmail,
+        string memory _newCustomerEmail,
+        string memory _changeDate
+    ) public payable returns (bool) {
+        Product storage product = productList[_productID];
+
+        Customer storage oldCustomer = customerList[_oldCustomerEmail];
+        Customer storage newCustomer = customerList[_newCustomerEmail];
+
+        require(productExists(_productID), "Product does not exist");
+        require(newCustomer.isExist, "New customer does not exist");
+        require(
+            compareTwoStrings(product.customerEmail, _oldCustomerEmail),
+            "Only the current owner can change the customer"
+        );
+
+        for (uint256 i = 0; i < oldCustomer.products.length; i++) {
+            if (compareTwoStrings(oldCustomer.products[i], _productID)) {
+                product.customerEmail = _newCustomerEmail;
+
+                HistoryItem memory historyItem;
+                historyItem.timestamp = block.timestamp;
+                historyItem.action = "Changed Customer";
+                historyItem.details = string(
+                    abi.encodePacked(
+                        "Old Customer: ",
+                        _oldCustomerEmail,
+                        ", New Customer: ",
+                        _newCustomerEmail
+                    )
+                );
+                historyItem.date = _changeDate;
+                product.history.push(historyItem);
+
+                newCustomer.products.push(_productID);
+                removeElement(i, oldCustomer.products);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function getAllProducts()
+        public
+        view
+        returns (Product[] memory, string[] memory)
+    {
+        uint256 numOfProducts = productIds.length;
+
+        Product[] memory products = new Product[](numOfProducts);
+
+        for (uint256 i = 0; i < numOfProducts; i++) {
+            products[i] = productList[productIds[i]];
+        }
+
+        return (products, productIds);
+    }
+
+    function getProductsByManufactory(string memory _manufactoryEmail)
+        public
+        view
+        returns (Product[] memory, string[] memory)
+    {
+        uint256 matchingProductCount = 0;
+
+        for (uint256 i = 0; i < productIds.length; i++) {
+            string memory productId = productIds[i];
+            if (
+                compareTwoStrings(
+                    productList[productId].manufactoryEmail,
+                    _manufactoryEmail
+                )
+            ) {
+                matchingProductCount++;
+            }
+        }
+
+        Product[] memory matchingProducts = new Product[](matchingProductCount);
+        string[] memory matchingProductIds = new string[](matchingProductCount);
+        uint256 currentIndex = 0;
+
+        for (uint256 i = 0; i < productIds.length; i++) {
+            string memory productId = productIds[i];
+            if (
+                compareTwoStrings(
+                    productList[productId].manufactoryEmail,
+                    _manufactoryEmail
+                )
+            ) {
+                matchingProducts[currentIndex] = productList[productId];
+                matchingProductIds[currentIndex] = productId;
+                currentIndex++;
+            }
+        }
+
+        return (matchingProducts, matchingProductIds);
+    }
+
+    function getProductsByRetailer(string memory _retailerEmail)
+        public
+        view
+        returns (Product[] memory, string[] memory)
+    {
+        uint256 matchingProductCount = 0;
+
+        for (uint256 i = 0; i < productIds.length; i++) {
+            string memory productId = productIds[i];
+            if (
+                compareTwoStrings(
+                    productList[productId].retailerEmail,
+                    _retailerEmail
+                )
+            ) {
+                matchingProductCount++;
+            }
+        }
+
+        Product[] memory matchingProducts = new Product[](matchingProductCount);
+        string[] memory matchingProductIds = new string[](matchingProductCount);
+        uint256 currentIndex = 0;
+
+        for (uint256 i = 0; i < productIds.length; i++) {
+            string memory productId = productIds[i];
+            if (
+                compareTwoStrings(
+                    productList[productId].retailerEmail,
+                    _retailerEmail
+                )
+            ) {
+                matchingProducts[currentIndex] = productList[productId];
+                matchingProductIds[currentIndex] = productId;
+                currentIndex++;
+            }
+        }
+
+        return (matchingProducts, matchingProductIds);
+    }
+
+    function getProductDetail(string memory _productID)
         public
         view
         returns (
-            uint256,
-            uint256,
-            uint256,
             string memory,
             string memory,
             string memory,
-            OrderWay[] memory
+            string memory,
+            HistoryItem[] memory,
+            string memory
         )
     {
         return (
-            ordersList[_orderID].weight,
-            ordersList[_orderID].size,
-            ordersList[_orderID].deposit,
-            ordersList[_orderID].senderPhone,
-            ordersList[_orderID].receiverPhone,
-            ordersList[_orderID].imageURL,
-            ordersList[_orderID].ways
+            productList[_productID].model,
+            productList[_productID].manufactoryEmail,
+            productList[_productID].retailerEmail,
+            productList[_productID].customerEmail,
+            productList[_productID].history,
+            productList[_productID].imageURL
         );
-    }
-
-    function getOrderHistories(string memory _orderID)
-        public
-        view
-        returns (HistoryOrder[] memory)
-    {
-        return (ordersList[_orderID].histories);
-    }
-
-    function createCustomer(
-        string memory _email,
-        string memory _phoneNumber,
-        string memory _cusPos,
-        string memory _name
-    ) public payable returns (bool) {
-        require(bytes(_email).length > 0, "Email is required");
-        require(
-            !(bytes(customersList[_email].name).length > 0),
-            "Email already exist"
-        );
-        require(bytes(_phoneNumber).length > 0, "Phonenumber is required");
-        require(
-            bytes(_phoneNumber).length > 9,
-            "Please enter 10 digits mobile number, only"
-        );
-        require(bytes(_cusPos).length > 0, "Address is required");
-        require(bytes(_name).length > 0, "Name is required");
-
-        if (customersList[_email].isExist) {
-            return false;
-        }
-
-        Customer memory newCustomer;
-        newCustomer.name = _name;
-        newCustomer.pos = _cusPos;
-        newCustomer.phoneNumber = _phoneNumber;
-        newCustomer.isExist = true;
-
-        customersList[_email] = newCustomer;
-
-        return true;
-    }
-
-    function createShippingCenter(
-        string memory _email,
-        string memory _phoneNumber,
-        string memory _name,
-        string memory _pos
-    ) public payable returns (bool) {
-        require(bytes(_email).length > 0, "Email is required");
-        require(
-            !(bytes(shippingCentersList[_email].name).length > 0),
-            "Email already exist"
-        );
-        require(bytes(_pos).length > 0, "Position is required");
-        require(bytes(_phoneNumber).length > 0, "Phonenumber is required");
-        require(
-            bytes(_phoneNumber).length > 9,
-            "Please enter 10 digits mobile number, only"
-        );
-        require(bytes(_name).length > 0, "Name is required");
-
-        ShippingCenter memory newShippingCenter;
-        newShippingCenter.name = _name;
-        newShippingCenter.phoneNumber = _phoneNumber;
-        newShippingCenter.email = _email;
-        newShippingCenter.pos = _pos;
-
-        shippingCentersList[_email] = newShippingCenter;
-
-        return true;
-    }
-
-    function createStorehouse(
-        string memory _email,
-        string memory _phoneNumber,
-        string memory _name,
-        string memory _pos
-    ) public payable returns (bool) {
-        require(bytes(_email).length > 0, "Email is required");
-        require(
-            !(bytes(storehousesList[_email].name).length > 0),
-            "Email already exist"
-        );
-        require(bytes(_pos).length > 0, "Position is required");
-        require(bytes(_phoneNumber).length > 0, "Phonenumber is required");
-        require(
-            bytes(_phoneNumber).length > 9,
-            "Please enter 10 digits mobile number, only"
-        );
-        require(bytes(_name).length > 0, "Name is required");
-
-        Storehouse memory newStorehouse;
-        newStorehouse.name = _name;
-        newStorehouse.phoneNumber = _phoneNumber;
-        newStorehouse.email = _email;
-        newStorehouse.pos = _pos;
-
-        storehousesList[_email] = newStorehouse;
-
-        return true;
-    }
-
-    function transferToStorehouse(
-        string memory _orderID,
-        string memory _storehouseEmail,
-        string memory _transferDate
-    ) public payable returns (bool) {
-        Order storage order = ordersList[_orderID];
-
-        require(orderExists(_orderID), "Order must be exist");
-        require(
-            bytes(storehousesList[_storehouseEmail].name).length > 0,
-            "Storehouse must be exist"
-        );
-        require(bytes(_transferDate).length > 0, "Moving date is required");
-
-        HistoryOrder memory newHistory;
-        newHistory.timestamp = block.timestamp;
-        newHistory.date = _transferDate;
-        newHistory.action = "Move to storehouse";
-        newHistory.detail = string(
-            abi.encodePacked("Storehouse:", _storehouseEmail)
-        );
-        order.histories.push(newHistory);
-
-        return true;
-    }
-
-    function transferToShippingCenter(
-        string memory _orderID,
-        string memory _shippingCenterEmail,
-        string memory _transferDate
-    ) public payable returns (bool) {
-        Order storage order = ordersList[_orderID];
-
-        require(orderExists(_orderID), "Order must be exist");
-        require(
-            bytes(shippingCentersList[_shippingCenterEmail].name).length > 0,
-            "Shipping center must be exist"
-        );
-        require(bytes(_transferDate).length > 0, "Moving date cannot be empty");
-
-        HistoryOrder memory newHistory;
-        newHistory.timestamp = block.timestamp;
-        newHistory.date = _transferDate;
-        newHistory.action = "Move to shipping center";
-        newHistory.detail = string(
-            abi.encodePacked("Shipping Center:", _shippingCenterEmail)
-        );
-        order.histories.push(newHistory);
-
-        return true;
-    }
-
-    function transferToCustomer(
-        string memory _orderID,
-        string memory _customerEmail,
-        string memory _transferDate
-    ) public payable returns (bool) {
-        Order storage order = ordersList[_orderID];
-
-        require(orderExists(_orderID), "Order must be exist");
-        require(
-            bytes(customersList[_customerEmail].name).length > 0,
-            "Customer must be exist"
-        );
-        require(bytes(_transferDate).length > 0, "Moving date cannot be empty");
-
-        order.status = OrderStatus.Delivered;
-
-        HistoryOrder memory newHistory;
-        newHistory.timestamp = block.timestamp;
-        newHistory.date = _transferDate;
-        newHistory.action = "Move to customer";
-        newHistory.detail = string(
-            abi.encodePacked("Customer:", _customerEmail)
-        );
-        order.histories.push(newHistory);
-
-        return true;
-    }
-
-    function cancelAnOrder(
-        string memory _orderID,
-        string memory _canceledDate,
-        string memory _reason
-    ) public payable returns (bool) {
-        Order storage order = ordersList[_orderID];
-        require(orderExists(_orderID), "Order must be exist");
-        require(
-            order.status != OrderStatus.Cancelled,
-            "Order must be in system"
-        );
-        require(
-            order.status != OrderStatus.Delivered,
-            "Order must be in system"
-        );
-        require(bytes(_canceledDate).length > 0, "Canceled date is required");
-
-        order.status = OrderStatus.Cancelled;
-
-        HistoryOrder memory newHistory;
-        newHistory.timestamp = block.timestamp;
-        newHistory.date = _canceledDate;
-        newHistory.action = "Canceled";
-        newHistory.detail = string(abi.encodePacked("Canceled:", _reason));
-
-        return true;
     }
 
     function getCustomerDetail(string memory _customerEmail)
         public
         view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            string memory
-        )
+        returns (string memory, string memory)
     {
         return (
-            customersList[_customerEmail].name,
-            customersList[_customerEmail].email,
-            customersList[_customerEmail].phoneNumber,
-            customersList[_customerEmail].pos
+            customerList[_customerEmail].name,
+            customerList[_customerEmail].email
         );
     }
 
-    function getShippingCenterDetail(string memory _shippingCenterEmail)
+    function getRetailerDetail(string memory _retailerEmail)
         public
         view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            string memory
-        )
+        returns (string memory, string memory)
     {
         return (
-            shippingCentersList[_shippingCenterEmail].name,
-            shippingCentersList[_shippingCenterEmail].email,
-            shippingCentersList[_shippingCenterEmail].phoneNumber,
-            shippingCentersList[_shippingCenterEmail].pos
+            retailerList[_retailerEmail].name,
+            customerList[_retailerEmail].email
         );
     }
 
-    function getStorehouseDetail(string memory _storehouseEmail)
+    function getManufactoryDetail(string memory _manufactoryEmail)
         public
         view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            string memory
-        )
+        returns (string memory, string memory)
     {
         return (
-            storehousesList[_storehouseEmail].name,
-            storehousesList[_storehouseEmail].email,
-            storehousesList[_storehouseEmail].phoneNumber,
-            storehousesList[_storehouseEmail].pos
+            manufactoryList[_manufactoryEmail].name,
+            customerList[_manufactoryEmail].email
         );
+    }
+
+    function getProductsByCustomer(string memory _customerEmail)
+        public
+        view
+        returns (string[] memory)
+    {
+        return customerList[_customerEmail].products;
+    }
+
+    function createManufactory(
+        string memory _manufactoryEmail,
+        string memory _manufactorName
+    ) public payable returns (bool) {
+        require(
+            bytes(_manufactoryEmail).length > 0,
+            "Manufactory email cannot be empty"
+        );
+        require(
+            bytes(_manufactorName).length > 0,
+            "Manufactory name cannot be empty"
+        );
+        require(
+            !(bytes(manufactoryList[_manufactoryEmail].name).length > 0),
+            "Email already exists"
+        );
+
+        Manufactory memory newManufactor;
+        newManufactor.name = _manufactorName;
+        manufactoryList[_manufactoryEmail] = newManufactor;
+
+        return true;
+    }
+
+    function createRetailer(
+        string memory _retailerEmail,
+        string memory _retailerName
+    ) public payable returns (bool) {
+        require(
+            bytes(_retailerEmail).length > 0,
+            "Retailer email cannot be empty"
+        );
+        require(
+            bytes(_retailerName).length > 0,
+            "Retailer name cannot be empty"
+        );
+        require(
+            !(bytes(retailerList[_retailerEmail].name).length > 0),
+            "Email already exists"
+        );
+
+        Retailer memory newRetailer;
+        newRetailer.name = _retailerName;
+        retailerList[_retailerEmail] = newRetailer;
+
+        return true;
+    }
+
+    function createCustomer(
+        string memory _customerEmail,
+        string memory _customerName
+    ) public payable returns (bool) {
+        require(
+            bytes(_customerEmail).length > 0,
+            "Customer email cannot be empty"
+        );
+        require(
+            bytes(_customerName).length > 0,
+            "Customer name cannot be empty"
+        );
+        require(
+            !(bytes(customerList[_customerEmail].name).length > 0),
+            "Email already exists"
+        );
+
+        if (customerList[_customerEmail].isExist) {
+            return false;
+        }
+
+        Customer memory newCustomer;
+        newCustomer.name = _customerName;
+        newCustomer.isExist = true;
+        customerList[_customerEmail] = newCustomer;
+        return true;
+    }
+
+    function removeManufactory(string memory _manufactoryEmail)
+        public
+        payable
+        returns (bool)
+    {
+        require(
+            bytes(manufactoryList[_manufactoryEmail].name).length > 0,
+            "Manufactory does not exist"
+        );
+
+        delete manufactoryList[_manufactoryEmail];
+
+        return true;
+    }
+
+    function removeRetailer(string memory _retailerEmail)
+        public
+        payable
+        returns (bool)
+    {
+        require(
+            bytes(retailerList[_retailerEmail].name).length > 0,
+            "Retailer does not exist"
+        );
+
+        delete retailerList[_retailerEmail];
+
+        return true;
+    }
+
+    function removeCustomer(string memory _customerEmail)
+        public
+        payable
+        returns (bool)
+    {
+        require(
+            customerList[_customerEmail].isExist,
+            "Customer does not exist"
+        );
+
+        delete customerList[_customerEmail];
+
+        return true;
     }
 
     function compareTwoStrings(string memory str1, string memory str2)
@@ -438,5 +495,21 @@ contract SMBPOST {
         return
             keccak256(abi.encodePacked(str1)) ==
             keccak256(abi.encodePacked(str2));
+    }
+
+    function removeElement(uint256 index, string[] storage array)
+        internal
+        returns (bool)
+    {
+        if (index >= array.length) {
+            return false;
+        }
+
+        for (uint256 i = index; i < array.length - 1; i++) {
+            array[i] = array[i + 1];
+        }
+
+        array.pop();
+        return true;
     }
 }

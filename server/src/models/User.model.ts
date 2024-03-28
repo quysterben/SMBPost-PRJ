@@ -11,7 +11,13 @@ const User = mongoose.model(
         type: String,
         enum: ['shippingCenter', 'admin', 'storehouse', 'customer'],
         default: 'customer'
-      }
+      },
+      isActive: {
+        type: Boolean,
+        default: true
+      },
+      phonenumber: String,
+      address: String
     },
     {
       timestamps: true
