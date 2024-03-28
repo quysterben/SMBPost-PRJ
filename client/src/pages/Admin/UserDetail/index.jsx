@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
-import { Avatar, Container, IconButton, Typography, Chip, Button } from '@mui/material';
+import { Avatar, Container, IconButton, Typography, Chip } from '@mui/material';
 import { blue } from '@mui/material/colors';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Swal from 'sweetalert2';
@@ -12,6 +12,9 @@ import convertRoleToText from '../../../utils/convertRoleToText';
 
 import useContractHook from '../../../hooks/useContractHook';
 
+import { createShipping, createStorehouse } from '../../../utils/web3func/userFuncs';
+import { LoadingButton } from '@mui/lab';
+
 export default function UserDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -19,9 +22,10 @@ export default function UserDetail() {
   const [userData, setUserData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
-  //   const web3 = useContractHook((state) => state.web3);
-  //   const contract = useContractHook((state) => state.contract);
+  const contract = useContractHook((state) => state.contract);
   const address = useContractHook((state) => state.account);
+
+  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,6 +50,41 @@ export default function UserDetail() {
       });
       return;
     }
+
+    try {
+      setIsLoadingBtn(true);
+
+      if (userData.role === 'shippingCenter') {
+        await createShipping(address, contract, {
+          email: userData.email,
+          phonenumber: userData.phonenumber,
+          username: userData.username,
+          address: userData.address
+        });
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Active account successfully!'
+        });
+      } else {
+        await createStorehouse(address, contract, {
+          email: userData.email,
+          phonenumber: userData.phonenumber,
+          username: userData.username,
+          address: userData.address
+        });
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Active account successfully!'
+        });
+      }
+      const res = await requestApi(`user/active/${id}`, 'PUT');
+      console.log(res);
+    } catch (err) {
+      console.log(err);
+    }
+    setIsLoadingBtn(false);
   };
 
   if (isLoading) {
@@ -116,13 +155,18 @@ export default function UserDetail() {
             sx={{ display: 'flex', mt: '36px', justifyContent: 'center', alignItems: 'center' }}
           >
             {!userData.isActive ? (
-              <Button onClick={handleActiveAccount} variant="contained" color="success">
+              <LoadingButton
+                loading={isLoadingBtn}
+                onClick={handleActiveAccount}
+                variant="contained"
+                color="success"
+              >
                 Active Account
-              </Button>
+              </LoadingButton>
             ) : (
-              <Button variant="outlined" color="error">
+              <LoadingButton loading={isLoadingBtn} variant="outlined" color="error">
                 Deactivate account
-              </Button>
+              </LoadingButton>
             )}
           </Container>
         </Container>

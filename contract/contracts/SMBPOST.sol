@@ -15,7 +15,6 @@ contract SMBPOST {
         string date;
         string action;
         string detail;
-        string imageURL;
     }
 
     struct OrderWay {
@@ -27,8 +26,7 @@ contract SMBPOST {
         string senderPhone;
         string receiverPhone;
         uint256 weight;
-        uint256 size;
-        uint256 deposit;
+        uint256 paidMoney;
         string note;
         string imageURL;
         OrderStatus status;
@@ -79,9 +77,8 @@ contract SMBPOST {
         string memory _senderPhone,
         string memory _receiverPhone,
         string memory _note,
-        uint256 _size,
         uint256 _weight,
-        uint256 _deposit,
+        uint256 _paidMoney,
         string memory _imageURL,
         string memory _requestDate
     ) public payable returns (bool) {
@@ -103,9 +100,8 @@ contract SMBPOST {
         newOrder.senderPhone = _senderPhone;
         newOrder.receiverPhone = _receiverPhone;
         newOrder.imageURL = _imageURL;
+        newOrder.paidMoney = _paidMoney;
         newOrder.weight = _weight;
-        newOrder.size = _size;
-        newOrder.deposit = _deposit;
         newOrder.note = _note;
 
         OrderWay memory way;
@@ -148,7 +144,6 @@ contract SMBPOST {
         returns (
             uint256,
             uint256,
-            uint256,
             string memory,
             string memory,
             string memory,
@@ -157,8 +152,7 @@ contract SMBPOST {
     {
         return (
             ordersList[_orderID].weight,
-            ordersList[_orderID].size,
-            ordersList[_orderID].deposit,
+            ordersList[_orderID].paidMoney,
             ordersList[_orderID].senderPhone,
             ordersList[_orderID].receiverPhone,
             ordersList[_orderID].imageURL,
@@ -178,7 +172,7 @@ contract SMBPOST {
         string memory _email,
         string memory _phoneNumber,
         string memory _name,
-        string memory _cusPos
+        string memory _pos
     ) public payable returns (bool) {
         require(bytes(_email).length > 0, "Email is required");
         require(
@@ -190,7 +184,7 @@ contract SMBPOST {
             bytes(_phoneNumber).length > 9,
             "Please enter 10 digits mobile number, only"
         );
-        require(bytes(_cusPos).length > 0, "Address is required");
+        require(bytes(_pos).length > 0, "Address is required");
         require(bytes(_name).length > 0, "Name is required");
 
         if (customersList[_email].isExist) {
@@ -199,7 +193,7 @@ contract SMBPOST {
 
         Customer memory newCustomer;
         newCustomer.name = _name;
-        newCustomer.pos = _cusPos;
+        newCustomer.pos = _pos;
         newCustomer.phoneNumber = _phoneNumber;
         newCustomer.isExist = true;
 

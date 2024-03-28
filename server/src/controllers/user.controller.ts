@@ -74,6 +74,25 @@ class UserController {
       return next(err)
     }
   }
+  public static async activeUser(req: Request, res: Response, next: NextFunction) {
+    const id = req.params.id
+    try {
+      const user = await db.User.findById(id)
+      if (!user) {
+        const err: any = new Error('User not found!')
+        err.statusCode = 404
+        throw err
+      }
+      user.isActive = !user.isActive
+      await user.save()
+      return res.status(200).json({ message: 'User updated!', user })
+    } catch (err: any) {
+      if (!err.statusCode) {
+        err.statusCode = 500
+      }
+      return next(err)
+    }
+  }
 }
 
 export default UserController
