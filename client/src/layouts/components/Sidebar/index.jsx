@@ -68,6 +68,7 @@ export default function Sidebar() {
       <MetaMaskBtn />
       <Container sx={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
         <Container
+          onClick={() => navigate('/admin/overview')}
           sx={{
             width: '100%',
             color: grey[600],
@@ -83,6 +84,7 @@ export default function Sidebar() {
           <Typography sx={{ fontWeight: '500' }}>Overview</Typography>
         </Container>
         <Container
+          onClick={() => navigate('/admin/management')}
           sx={{
             width: '100%',
             color: grey[600],
@@ -98,6 +100,7 @@ export default function Sidebar() {
           <Typography sx={{ fontWeight: '500' }}>Management</Typography>
         </Container>
         <Container
+          onClick={() => navigate('/admin/orders')}
           sx={{
             width: '100%',
             color: grey[600],

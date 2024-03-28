@@ -15,6 +15,7 @@ contract SMBPOST {
         string date;
         string action;
         string detail;
+        string posEmail;
     }
 
     struct OrderWay {
@@ -25,8 +26,6 @@ contract SMBPOST {
     struct Order {
         string senderPhone;
         string receiverPhone;
-        uint256 weight;
-        uint256 paidMoney;
         string note;
         string imageURL;
         OrderStatus status;
@@ -36,22 +35,14 @@ contract SMBPOST {
 
     struct ShippingCenter {
         string email;
-        string name;
-        string phoneNumber;
-        string pos;
     }
 
     struct Storehouse {
         string email;
-        string name;
-        string phoneNumber;
-        string pos;
     }
 
     struct Customer {
         string email;
-        string name;
-        string pos;
         string phoneNumber;
         bool isExist;
         string[] receivedOrders;
@@ -77,17 +68,15 @@ contract SMBPOST {
         string memory _senderPhone,
         string memory _receiverPhone,
         string memory _note,
-        uint256 _weight,
-        uint256 _paidMoney,
         string memory _imageURL,
         string memory _requestDate
     ) public payable returns (bool) {
         require(
-            bytes(customersList[_senderPhone].name).length > 0,
+            bytes(customersList[_senderPhone].email).length > 0,
             "Customer does not exist"
         );
         require(
-            bytes(customersList[_receiverPhone].name).length > 0,
+            bytes(customersList[_receiverPhone].email).length > 0,
             "Customer does not exist"
         );
         require(bytes(_orderID).length > 0, "OrderID is required");
@@ -100,13 +89,11 @@ contract SMBPOST {
         newOrder.senderPhone = _senderPhone;
         newOrder.receiverPhone = _receiverPhone;
         newOrder.imageURL = _imageURL;
-        newOrder.paidMoney = _paidMoney;
-        newOrder.weight = _weight;
         newOrder.note = _note;
 
         OrderWay memory way;
         way.posType = "ShippingCenter";
-        way.posName = shippingCentersList[_shippingCenterEmail].name;
+        way.posName = shippingCentersList[_shippingCenterEmail].email;
         newOrder.ways.push(way);
 
         HistoryOrder memory history;
@@ -115,6 +102,7 @@ contract SMBPOST {
         history.detail = string(
             abi.encodePacked("Shipping Center:", _shippingCenterEmail)
         );
+        history.posEmail = _shippingCenterEmail;
         history.date = _requestDate;
         newOrder.histories.push(history);
 
@@ -125,16 +113,16 @@ contract SMBPOST {
     }
 
     function addOrderWay(
-        string memory _posType,
-        string memory _posName,
+        string[] memory _posTypes,
+        string[] memory _posNames,
         string memory _orderID
     ) public payable returns (bool) {
-        OrderWay memory newWay;
-        newWay.posType = _posType;
-        newWay.posName = _posName;
-
-        ordersList[_orderID].ways.push(newWay);
-
+        for (uint256 i = 0; i < _posTypes.length - 1; i++) {
+            OrderWay memory way;
+            way.posType = _posTypes[i];
+            way.posName = _posNames[i];
+            ordersList[_orderID].ways.push(way);
+        }
         return true;
     }
 
@@ -142,41 +130,32 @@ contract SMBPOST {
         public
         view
         returns (
-            uint256,
-            uint256,
             string memory,
             string memory,
             string memory,
-            OrderWay[] memory
+            string memory,
+            OrderWay[] memory,
+            HistoryOrder[] memory
         )
     {
         return (
-            ordersList[_orderID].weight,
-            ordersList[_orderID].paidMoney,
             ordersList[_orderID].senderPhone,
             ordersList[_orderID].receiverPhone,
             ordersList[_orderID].imageURL,
-            ordersList[_orderID].ways
+            ordersList[_orderID].note,
+            ordersList[_orderID].ways,
+            ordersList[_orderID].histories
         );
     }
 
-    function getOrderHistories(string memory _orderID)
+    function createCustomer(string memory _email, string memory _phoneNumber)
         public
-        view
-        returns (HistoryOrder[] memory)
+        payable
+        returns (bool)
     {
-        return (ordersList[_orderID].histories);
-    }
-
-    function createCustomer(
-        string memory _email,
-        string memory _phoneNumber,
-        string memory _name,
-        string memory _pos
-    ) public payable returns (bool) {
         require(bytes(_email).length > 0, "Email is required");
         require(
-            !(bytes(customersList[_email].name).length > 0),
+            !(bytes(customersList[_email].email).length > 0),
             "Email already exist"
         );
         require(bytes(_phoneNumber).length > 0, "Phonenumber is required");
@@ -184,79 +163,50 @@ contract SMBPOST {
             bytes(_phoneNumber).length > 9,
             "Please enter 10 digits mobile number, only"
         );
-        require(bytes(_pos).length > 0, "Address is required");
-        require(bytes(_name).length > 0, "Name is required");
 
         if (customersList[_email].isExist) {
             return false;
         }
 
         Customer memory newCustomer;
-        newCustomer.name = _name;
-        newCustomer.pos = _pos;
         newCustomer.phoneNumber = _phoneNumber;
+        newCustomer.email = _email;
         newCustomer.isExist = true;
-
         customersList[_email] = newCustomer;
 
         return true;
     }
 
-    function createShippingCenter(
-        string memory _email,
-        string memory _phoneNumber,
-        string memory _name,
-        string memory _pos
-    ) public payable returns (bool) {
+    function createShippingCenter(string memory _email)
+        public
+        payable
+        returns (bool)
+    {
         require(bytes(_email).length > 0, "Email is required");
         require(
-            !(bytes(shippingCentersList[_email].name).length > 0),
+            !(bytes(shippingCentersList[_email].email).length > 0),
             "Email already exist"
         );
-        require(bytes(_pos).length > 0, "Position is required");
-        require(bytes(_phoneNumber).length > 0, "Phonenumber is required");
-        require(
-            bytes(_phoneNumber).length > 9,
-            "Please enter 10 digits mobile number, only"
-        );
-        require(bytes(_name).length > 0, "Name is required");
-
         ShippingCenter memory newShippingCenter;
-        newShippingCenter.name = _name;
-        newShippingCenter.phoneNumber = _phoneNumber;
         newShippingCenter.email = _email;
-        newShippingCenter.pos = _pos;
-
         shippingCentersList[_email] = newShippingCenter;
 
         return true;
     }
 
-    function createStorehouse(
-        string memory _email,
-        string memory _phoneNumber,
-        string memory _name,
-        string memory _pos
-    ) public payable returns (bool) {
+    function createStorehouse(string memory _email)
+        public
+        payable
+        returns (bool)
+    {
         require(bytes(_email).length > 0, "Email is required");
         require(
-            !(bytes(storehousesList[_email].name).length > 0),
+            !(bytes(storehousesList[_email].email).length > 0),
             "Email already exist"
         );
-        require(bytes(_pos).length > 0, "Position is required");
-        require(bytes(_phoneNumber).length > 0, "Phonenumber is required");
-        require(
-            bytes(_phoneNumber).length > 9,
-            "Please enter 10 digits mobile number, only"
-        );
-        require(bytes(_name).length > 0, "Name is required");
 
         Storehouse memory newStorehouse;
-        newStorehouse.name = _name;
-        newStorehouse.phoneNumber = _phoneNumber;
         newStorehouse.email = _email;
-        newStorehouse.pos = _pos;
-
         storehousesList[_email] = newStorehouse;
 
         return true;
@@ -271,7 +221,7 @@ contract SMBPOST {
 
         require(orderExists(_orderID), "Order must be exist");
         require(
-            bytes(storehousesList[_storehouseEmail].name).length > 0,
+            bytes(storehousesList[_storehouseEmail].email).length > 0,
             "Storehouse must be exist"
         );
         require(bytes(_transferDate).length > 0, "Moving date is required");
@@ -297,7 +247,7 @@ contract SMBPOST {
 
         require(orderExists(_orderID), "Order must be exist");
         require(
-            bytes(shippingCentersList[_shippingCenterEmail].name).length > 0,
+            bytes(shippingCentersList[_shippingCenterEmail].email).length > 0,
             "Shipping center must be exist"
         );
         require(bytes(_transferDate).length > 0, "Moving date cannot be empty");
@@ -323,7 +273,7 @@ contract SMBPOST {
 
         require(orderExists(_orderID), "Order must be exist");
         require(
-            bytes(customersList[_customerEmail].name).length > 0,
+            bytes(customersList[_customerEmail].email).length > 0,
             "Customer must be exist"
         );
         require(bytes(_transferDate).length > 0, "Moving date cannot be empty");
@@ -373,55 +323,73 @@ contract SMBPOST {
     function getCustomerDetail(string memory _customerEmail)
         public
         view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            string memory
-        )
+        returns (string memory)
     {
-        return (
-            customersList[_customerEmail].name,
-            customersList[_customerEmail].email,
-            customersList[_customerEmail].phoneNumber,
-            customersList[_customerEmail].pos
-        );
+        return (customersList[_customerEmail].email);
     }
 
     function getShippingCenterDetail(string memory _shippingCenterEmail)
         public
         view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            string memory
-        )
+        returns (string memory)
     {
-        return (
-            shippingCentersList[_shippingCenterEmail].name,
-            shippingCentersList[_shippingCenterEmail].email,
-            shippingCentersList[_shippingCenterEmail].phoneNumber,
-            shippingCentersList[_shippingCenterEmail].pos
-        );
+        return (shippingCentersList[_shippingCenterEmail].email);
     }
 
     function getStorehouseDetail(string memory _storehouseEmail)
         public
         view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            string memory
-        )
+        returns (string memory)
     {
-        return (
-            storehousesList[_storehouseEmail].name,
-            storehousesList[_storehouseEmail].email,
-            storehousesList[_storehouseEmail].phoneNumber,
-            storehousesList[_storehouseEmail].pos
-        );
+        return (storehousesList[_storehouseEmail].email);
+    }
+
+    function getAllOrders()
+        public
+        view
+        returns (Order[] memory, string[] memory)
+    {
+        uint256 orderCount = orderIDs.length;
+
+        Order[] memory orders = new Order[](orderCount);
+
+        for (uint256 i = 0; i < orderCount; i++) {
+            orders[i] = ordersList[orderIDs[i]];
+        }
+
+        return (orders, orderIDs);
+    }
+
+    function getOrderByEmail(string memory _email)
+        public
+        view
+        returns (Order[] memory, string[] memory)
+    {
+        uint256 orderCount = 0;
+
+        for (uint256 i = 0; i < orderIDs.length; i++) {
+            string memory orderID = orderIDs[i];
+            HistoryOrder[] memory histories = ordersList[orderID].histories;
+            if (findOrderByHistory(histories, _email)) {
+                orderCount++;
+            }
+        }
+
+        Order[] memory orders = new Order[](orderCount);
+        string[] memory ids = new string[](orderCount);
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < orderIDs.length; i++) {
+            string memory orderID = orderIDs[i];
+            HistoryOrder[] memory histories = ordersList[orderID].histories;
+            if (findOrderByHistory(histories, _email)) {
+                orders[index] = ordersList[orderID];
+                ids[index] = orderID;
+                index++;
+            }
+        }
+
+        return (orders, ids);
     }
 
     function removeShoppingCenter(string memory _email)
@@ -430,12 +398,10 @@ contract SMBPOST {
         returns (bool)
     {
         require(
-            bytes(shippingCentersList[_email].name).length > 0,
+            bytes(shippingCentersList[_email].email).length > 0,
             "Shipping center does not exist"
         );
-
         delete shippingCentersList[_email];
-
         return true;
     }
 
@@ -445,12 +411,10 @@ contract SMBPOST {
         returns (bool)
     {
         require(
-            bytes(storehousesList[_email].name).length > 0,
+            bytes(storehousesList[_email].email).length > 0,
             "Storehouse does not exist"
         );
-
         delete storehousesList[_email];
-
         return true;
     }
 
@@ -460,12 +424,10 @@ contract SMBPOST {
         returns (bool)
     {
         require(
-            bytes(customersList[_email].name).length > 0,
+            bytes(customersList[_email].email).length > 0,
             "Customer does not exist"
         );
-
         delete customersList[_email];
-
         return true;
     }
 
@@ -477,5 +439,17 @@ contract SMBPOST {
         return
             keccak256(abi.encodePacked(str1)) ==
             keccak256(abi.encodePacked(str2));
+    }
+
+    function findOrderByHistory(
+        HistoryOrder[] memory histories,
+        string memory _email
+    ) internal pure returns (bool) {
+        for (uint256 i = 0; i < histories.length; i++) {
+            if (compareTwoStrings(histories[i].posEmail, _email)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

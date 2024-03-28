@@ -12,7 +12,12 @@ import convertRoleToText from '../../../utils/convertRoleToText';
 
 import useContractHook from '../../../hooks/useContractHook';
 
-import { createShipping, createStorehouse } from '../../../utils/web3func/userFuncs';
+import {
+  createShipping,
+  createStorehouse,
+  removeShippingCenter,
+  removeStorehouse
+} from '../../../utils/web3func/userFuncs';
 import { LoadingButton } from '@mui/lab';
 
 export default function UserDetail() {
@@ -27,17 +32,17 @@ export default function UserDetail() {
 
   const [isLoadingBtn, setIsLoadingBtn] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await requestApi(`user/get-user/${id}`, 'GET');
-        setUserData(res.data.user);
-        setIsLoading(false);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      const res = await requestApi(`user/get-user/${id}`, 'GET');
+      setUserData(res.data.user);
+      setIsLoading(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -56,10 +61,7 @@ export default function UserDetail() {
 
       if (userData.role === 'shippingCenter') {
         await createShipping(address, contract, {
-          email: userData.email,
-          phonenumber: userData.phonenumber,
-          username: userData.username,
-          address: userData.address
+          email: userData.email
         });
         Swal.fire({
           icon: 'success',
@@ -68,10 +70,7 @@ export default function UserDetail() {
         });
       } else {
         await createStorehouse(address, contract, {
-          email: userData.email,
-          phonenumber: userData.phonenumber,
-          username: userData.username,
-          address: userData.address
+          email: userData.email
         });
         Swal.fire({
           icon: 'success',
@@ -81,8 +80,55 @@ export default function UserDetail() {
       }
       const res = await requestApi(`user/active/${id}`, 'PUT');
       console.log(res);
+      fetchData();
     } catch (err) {
       console.log(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Something went wrong!'
+      });
+    }
+    setIsLoadingBtn(false);
+  };
+
+  const handleDeactiveAccount = async () => {
+    if (!address) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please connect your wallet first!'
+      });
+      return;
+    }
+
+    try {
+      setIsLoadingBtn(true);
+      if (userData.role === 'shippingCenter') {
+        await removeShippingCenter(address, contract, userData.email);
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Deactive account successfully!'
+        });
+      } else {
+        await removeStorehouse(address, contract, userData.email);
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Deactive account successfully!'
+        });
+      }
+      const res = await requestApi(`user/active/${id}`, 'PUT');
+      console.log(res);
+      fetchData();
+    } catch (err) {
+      console.log(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Something went wrong!'
+      });
     }
     setIsLoadingBtn(false);
   };
@@ -164,7 +210,12 @@ export default function UserDetail() {
                 Active Account
               </LoadingButton>
             ) : (
-              <LoadingButton loading={isLoadingBtn} variant="outlined" color="error">
+              <LoadingButton
+                onClick={handleDeactiveAccount}
+                loading={isLoadingBtn}
+                variant="outlined"
+                color="error"
+              >
                 Deactivate account
               </LoadingButton>
             )}
