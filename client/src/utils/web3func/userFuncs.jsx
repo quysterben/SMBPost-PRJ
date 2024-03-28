@@ -15,3 +15,21 @@ export const createCustomer = async (accountAddress, contract, customerData) => 
     from: accountAddress
   });
 };
+
+export const removeShipping = async (accountAddress, contract, email) => {
+  return await contract.methods.removeShoppingCenter(email).send({
+    from: accountAddress
+  });
+};
+
+export const removeStorehouse = async (accountAddress, contract, email) => {
+  return await contract.methods.removeStorehouse(email).send({
+    from: accountAddress
+  });
+};
+
+export const removeCustomer = async (accountAddress, contract, email) => {
+  return await contract.methods.removeCustomer(email).send({
+    from: accountAddress
+  });
+};

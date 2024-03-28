@@ -16,6 +16,23 @@ class UserController {
       return next(err)
     }
   }
+  public static async getUserById(req: Request, res: Response, next: NextFunction) {
+    const id = req.params.id
+    try {
+      const user = await db.User.findById(id, '-password')
+      if (!user) {
+        const err: any = new Error('User not found!')
+        err.statusCode = 404
+        throw err
+      }
+      return res.status(200).json({ message: 'User fetched!', user })
+    } catch (err: any) {
+      if (!err.statusCode) {
+        err.statusCode = 500
+      }
+      return next(err)
+    }
+  }
   public static async createNewUser(req: Request, res: Response, next: NextFunction) {
     const { email, username, role, phonenumber, address } = req.body as unknown as {
       email: string
@@ -40,7 +57,15 @@ class UserController {
         throw err
       }
 
-      const newUser = await db.User.create({ email, username, password: defaultPassword, role, phonenumber, address })
+      const newUser = await db.User.create({
+        email,
+        username,
+        password: defaultPassword,
+        role,
+        phonenumber,
+        address,
+        isActive: false
+      })
       return res.status(201).json({ message: 'User created!', userId: newUser._id })
     } catch (err: any) {
       if (!err.statusCode) {

@@ -22,7 +22,13 @@ const style = {
   zIndex: 2
 };
 
-export default function CreateNewUserModal() {
+import PropTypes from 'prop-types';
+
+CreateNewUserModal.propTypes = {
+  refetch: PropTypes.func
+};
+
+export default function CreateNewUserModal({ refetch }) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -64,6 +70,13 @@ export default function CreateNewUserModal() {
     try {
       const response = await requestAPI('user/create-user', 'POST', data);
       console.log(response);
+      await refetch();
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Create new user successfully'
+      });
+      handleClose();
     } catch (error) {
       Swal.fire({
         icon: 'error',

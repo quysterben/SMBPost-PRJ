@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { blue, grey } from '@mui/material/colors';
 import {
   Table,
@@ -17,20 +19,22 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import CreateNewUserModal from '../../../components/ModalComponents/CreateNewUserModal';
 
 import requestAPI from '../../../utils/fetchAPI';
+import convertRoleToText from '../../../utils/convertRoleToText';
 
 export default function Management() {
+  const navigate = useNavigate();
   const [userDatas, setUserDatas] = useState([]);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const res = await requestAPI('user', 'GET');
-        setUserDatas(res.data.users);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+  const fetchUserData = async () => {
+    try {
+      const res = await requestAPI('user', 'GET');
+      setUserDatas(res.data.users);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
+  useEffect(() => {
     fetchUserData();
   }, []);
 
@@ -44,7 +48,7 @@ export default function Management() {
           height: '48px'
         }}
       >
-        <CreateNewUserModal />
+        <CreateNewUserModal refetch={fetchUserData} />
       </Container>
       <TableContainer sx={{ width: '96%', mx: 'auto', mt: '12px' }} component={Paper}>
         <Table aria-label="User management">
@@ -60,16 +64,24 @@ export default function Management() {
           </TableHead>
           <TableBody>
             {userDatas.map((user) => (
-              <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} key={user._id}>
+              <TableRow
+                sx={{
+                  '&:last-child td, &:last-child th': { border: 0 },
+                  bgcolor: user.isActive || grey[300]
+                }}
+                key={user._id}
+              >
                 <TableCell>{user._id}</TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>{user.email}</TableCell>
-                <TableCell>{user.role}</TableCell>
+                <TableCell>{convertRoleToText(user.role)}</TableCell>
                 <TableCell>{new Date(user.createdAt).toLocaleString()}</TableCell>
                 <TableCell>
-                  <IconButton>
-                    <VisibilityIcon sx={{ ':hover': { color: blue[400] } }} />
-                  </IconButton>
+                  {user.role == 'admin' ? null : (
+                    <IconButton onClick={() => navigate(user._id)}>
+                      <VisibilityIcon sx={{ ':hover': { color: blue[400] } }} />
+                    </IconButton>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
