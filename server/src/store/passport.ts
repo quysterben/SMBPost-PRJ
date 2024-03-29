@@ -9,10 +9,7 @@ export const applyPassportStrategy = (passport: any) => {
   passport.use(
     new Strategy(options, async (jwtPayload, done) => {
       const user = await db.User.findById(jwtPayload._id)
-      if (user) {
-        if (user.isActive === false) {
-          return done(null, false)
-        }
+      if (user && user.isActive === true) {
         return done(null, user)
       }
       return done(null, false)

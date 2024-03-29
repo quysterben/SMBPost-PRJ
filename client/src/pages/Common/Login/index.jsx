@@ -68,6 +68,10 @@ export default function Login() {
         navigate('/admin/overview');
       } else if (res.data.role === 'shippingCenter') {
         navigate('/center/overview');
+      } else if (res.data.role === 'storehouse') {
+        navigate('/storehouse/overview');
+      } else if (res.data.role === 'customer') {
+        navigate('/verify');
       }
     } catch (err) {
       Swal.fire({

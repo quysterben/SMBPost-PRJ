@@ -128,6 +128,7 @@ export default function CreateNewUserModal({ refetch }) {
               >
                 <MenuItem value={'shippingCenter'}>Shipping Center</MenuItem>
                 <MenuItem value={'storehouse'}>Storehouse</MenuItem>
+                <MenuItem value={'customer'}>Customer</MenuItem>
               </Select>
             </FormControl>
             <FormControl fullWidth>
