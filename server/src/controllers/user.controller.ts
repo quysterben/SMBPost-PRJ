@@ -8,7 +8,7 @@ const defaultPassword = '12345678'
 class UserController {
   public static async getAllUsers(req: Request, res: Response, next: NextFunction) {
     try {
-      const users = await db.User.find({ role: ['shippingCenter', 'admin', 'storehouse', 'customer'] }, '-password')
+      const users = await db.User.find({ role: ['shippingCenter', 'storehouse', 'customer'] }, '-password')
       return res.status(200).json({ message: 'Users fetched!', users })
     } catch (err: any) {
       if (!err.statusCode) {

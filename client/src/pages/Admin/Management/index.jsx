@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +13,9 @@ import {
   TableRow,
   Paper,
   Container,
-  IconButton
+  IconButton,
+  ToggleButtonGroup,
+  ToggleButton
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
@@ -25,6 +28,8 @@ export default function Management() {
   const navigate = useNavigate();
   const [userDatas, setUserDatas] = useState([]);
 
+  const [status, setStatus] = useState('all');
+
   const fetchUserData = async () => {
     try {
       const res = await requestAPI('user', 'GET');
@@ -32,6 +37,41 @@ export default function Management() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const [optionStatus, setOptionStatus] = useState('all');
+  const handleChangeOptionStatus = (event, newOptionStatus) => {
+    if (newOptionStatus) {
+      setOptionStatus(newOptionStatus);
+    }
+  };
+  const generateUserListFilter = (users = [], optionFilter = 'total') => {
+    if (optionFilter === 'shippingCenter') {
+      return users.filter((user) => user?.role === 'shippingCenter');
+    }
+    if (optionFilter === 'storehouse') {
+      return users.filter((user) => user?.role === 'storehouse');
+    }
+    if (optionFilter === 'customer') {
+      return users.filter((user) => user?.role === 'customer');
+    }
+    return users;
+  };
+
+  const [optionRole, setOptionRole] = useState('all');
+  const handleChangeOptionRole = (event, newOptionRole) => {
+    if (newOptionRole) {
+      setOptionRole(newOptionRole);
+    }
+  };
+  const generateUserListFilterStatus = (users = [], optionFilter = 'total') => {
+    if (optionFilter === 'active') {
+      return users.filter((user) => user?.isActive);
+    }
+    if (optionFilter === 'inactive') {
+      return users.filter((user) => !user?.isActive);
+    }
+    return users;
   };
 
   useEffect(() => {
@@ -43,15 +83,75 @@ export default function Management() {
       <Container
         sx={{
           display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'flex-end',
-          height: '48px'
+          height: '100px'
         }}
       >
-        <CreateNewUserModal refetch={fetchUserData} />
+        <Container
+          sx={{
+            display: 'flex',
+            flex: '1',
+            width: '100%',
+            py: '4px',
+            flexDirection: 'column',
+            gap: '12px',
+            justifyContent: 'center',
+            my: 'auto'
+          }}
+        >
+          <ToggleButtonGroup
+            color="primary"
+            size="small"
+            value={optionStatus}
+            exclusive
+            onChange={handleChangeOptionStatus}
+          >
+            <ToggleButton value="all">
+              {`All (${generateUserListFilter(userDatas).length})`}
+            </ToggleButton>
+            <ToggleButton value="active">
+              {`Active (${generateUserListFilterStatus(userDatas, 'active').length})`}
+            </ToggleButton>
+            <ToggleButton value="inactive">
+              {`Inactive (${generateUserListFilterStatus(userDatas, 'inactive').length})`}
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <ToggleButtonGroup
+            size="small"
+            value={optionRole}
+            exclusive
+            color="primary"
+            onChange={handleChangeOptionRole}
+          >
+            <ToggleButton value="all">
+              {`All (${generateUserListFilter(userDatas).length})`}
+            </ToggleButton>
+            <ToggleButton value="shippingCenter">
+              {`Shipping Center (${generateUserListFilter(userDatas, 'shippingCenter').length})`}
+            </ToggleButton>
+            <ToggleButton value="storehouse">
+              {`Storehouse (${generateUserListFilter(userDatas, 'storehouse').length})`}
+            </ToggleButton>
+            <ToggleButton value="customer">
+              {`Customer (${generateUserListFilter(userDatas, 'customer').length})`}
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Container>
+        <Container
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'flex-end',
+            width: '200px'
+          }}
+        >
+          <CreateNewUserModal refetch={fetchUserData} />
+        </Container>
       </Container>
-      <TableContainer sx={{ width: '96%', mx: 'auto', mt: '12px' }} component={Paper}>
-        <Table aria-label="User management">
+      <TableContainer
+        sx={{ width: '96%', mx: 'auto', mt: '12px', maxHeight: '570px' }}
+        component={Paper}
+      >
+        <Table stickyHeader aria-label="User management">
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
@@ -63,7 +163,10 @@ export default function Management() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {userDatas.map((user) => (
+            {generateUserListFilterStatus(
+              generateUserListFilter(userDatas, optionRole),
+              optionStatus
+            ).map((user) => (
               <TableRow
                 sx={{
                   '&:last-child td, &:last-child th': { border: 0 },
