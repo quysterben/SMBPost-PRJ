@@ -109,7 +109,7 @@ class UserController {
   }
   public static async getStaffs(req: Request, res: Response, next: NextFunction) {
     try {
-      const staffs = await db.User.find({ role: ['shippingCenter', 'storehouse'], isActive: true }, '-password')
+      const staffs = await db.User.find({ role: ['storehouse'], isActive: true }, '-password')
       return res.status(200).json({ message: 'Staffs fetched!', staffs })
     } catch (err: any) {
       if (!err.statusCode) {

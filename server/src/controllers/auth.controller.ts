@@ -92,7 +92,9 @@ class AuthController {
         userId: user._id,
         role: user.role,
         username: user.username,
-        email: user.email
+        email: user.email,
+        address: user.address,
+        phone: user.phonenumber
       })
     } catch (err: any) {
       if (!err.statusCode) {
