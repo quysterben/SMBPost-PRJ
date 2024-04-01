@@ -1,8 +1,9 @@
+/* eslint-disable react/prop-types */
 import * as React from 'react';
 import { Input as BaseInput } from '@mui/base/Input';
 import { styled } from '@mui/system';
 
-const Input = React.forwardRef(function CustomInput(props, ref) {
+const Input = React.forwardRef(function CustomInput(props, inputRef) {
   return (
     <BaseInput
       slots={{
@@ -11,13 +12,13 @@ const Input = React.forwardRef(function CustomInput(props, ref) {
         textarea: TextareaElement
       }}
       {...props}
-      ref={ref}
+      inputRef={inputRef}
     />
   );
 });
 
-export default function InputMultiline() {
-  return <Input aria-label="Demo input" multiline placeholder="Note" />;
+export default function InputMultiline({ inputRef }) {
+  return <Input aria-label="Demo input" inputRef={inputRef} multiline placeholder="Note" />;
 }
 
 const blue = {

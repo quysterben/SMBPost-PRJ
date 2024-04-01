@@ -60,6 +60,7 @@ export default function Login() {
       localStorage.setItem('userId', res.data.userId);
       localStorage.setItem('userRole', res.data.role);
       localStorage.setItem('userName', res.data.username);
+      localStorage.setItem('userEmail', res.data.email);
       Swal.fire({
         icon: 'success',
         title: 'Login success!'

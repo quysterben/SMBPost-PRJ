@@ -27,6 +27,7 @@ export default function Sidebar() {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('userId');
       localStorage.removeItem('userRole');
+      localStorage.removeItem('userEmail');
       Swal.fire({
         icon: 'success',
         title: 'Logout success!'

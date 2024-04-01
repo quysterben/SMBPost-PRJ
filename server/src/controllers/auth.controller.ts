@@ -86,9 +86,14 @@ class AuthController {
         await db.Key.create({ userId: user._id, refreshToken })
       }
 
-      return res
-        .status(200)
-        .json({ accessToken, refreshToken, userId: user._id, role: user.role, username: user.username })
+      return res.status(200).json({
+        accessToken,
+        refreshToken,
+        userId: user._id,
+        role: user.role,
+        username: user.username,
+        email: user.email
+      })
     } catch (err: any) {
       if (!err.statusCode) {
         err.statusCode = 500
