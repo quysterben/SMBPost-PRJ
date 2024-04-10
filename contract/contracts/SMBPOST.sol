@@ -69,7 +69,9 @@ contract SMBPOST {
         string memory _receiverPhone,
         string memory _note,
         string memory _imageURL,
-        string memory _requestDate
+        string memory _requestDate,
+        string[] memory _posTypes,
+        string[] memory _posNames
     ) public payable returns (bool) {
         require(
             bytes(customersList[_senderPhone].email).length > 0,
@@ -109,23 +111,16 @@ contract SMBPOST {
         ordersList[_orderID] = newOrder;
         orderIDs.push(_orderID);
 
-        return true;
-    }
-
-    function addOrderWay(
-        string[] memory _posTypes,
-        string[] memory _posNames,
-        string memory _orderID
-    ) public payable returns (bool) {
         for (uint256 i = 0; i < _posTypes.length - 1; i++) {
-            OrderWay memory way;
-            way.posType = _posTypes[i];
-            way.posName = _posNames[i];
-            ordersList[_orderID].ways.push(way);
+            OrderWay memory newWay;
+            newWay.posType = _posTypes[i];
+            newWay.posName = _posNames[i];
+            ordersList[_orderID].ways.push(newWay);
         }
+
         return true;
     }
-
+    
     function getOrderDetail(string memory _orderID)
         public
         view
