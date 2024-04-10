@@ -30,7 +30,6 @@ function App() {
         const contract = new web3.eth.Contract(contractInfo.abi, ContractAddress);
         if (provider) {
           provider.on('accountsChanged', (accounts) => {
-            console.log(accounts);
             setAccount(accounts[0]);
           });
 

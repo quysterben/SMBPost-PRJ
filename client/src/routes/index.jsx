@@ -46,7 +46,7 @@ const privateRoutes = [
     role: 'shippingCenter'
   },
 
-  { path: '*', component: NotFound, layout: null },
+  { path: '*', component: NotFound, layout: DefaultLayout },
   { path: '/verify', component: Verify, layout: DefaultLayout }
 ];
 

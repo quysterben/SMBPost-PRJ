@@ -13,15 +13,15 @@ import {
   InputLabel,
   Typography,
   Menu,
-  MenuItem
+  Paper
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import AddIcon from '@mui/icons-material/Add';
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 
 import Timeline from '@mui/lab/Timeline';
 import TimelineItem from '@mui/lab/TimelineItem';
@@ -32,6 +32,8 @@ import TimelineDot from '@mui/lab/TimelineDot';
 import { grey } from '@mui/material/colors';
 
 import requestApi from '../../../utils/fetchAPI';
+
+import { useForm } from 'react-hook-form';
 
 export default function CreateOrder() {
   const navigate = useNavigate();
@@ -98,235 +100,254 @@ export default function CreateOrder() {
   const [image, setImage] = useState(null);
   const handleUploadImage = (event) => {
     if (!event.target.files.length) return;
-    setImage(URL.createObjectURL(event.target.files[0]));
+    setImage({ image: event.target.files[0], url: URL.createObjectURL(event.target.files[0]) });
   };
 
-  const handleSubmitLocation = (value) => {
+  const handleSelectLocation = (value) => {
     if (value) {
       setLocationList([...locationList, value]);
       handleCloseRoute();
     }
   };
-  const handleDeleteLocaltion = (index) => {
+  const handleDeleteLocation = (index) => {
     const newLocationList = locationList.filter((_, i) => i !== index);
     setLocationList(newLocationList);
   };
 
-  const handleSubmit = async () => {
-    console.log(sender, receiver, locationList, note.current.value);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm();
+
+  const onSubmit = async () => {
+    console.log(sender, receiver, locationList, note.current.value, image);
   };
 
   if (loading) return <div>Loading...</div>;
   return (
     <Container>
-      <Container sx={{ display: 'flex', justifyContent: 'space-between', mt: '20px' }}>
-        <IconButton onClick={() => navigate(-1)}>
-          <ArrowBackIcon />
-        </IconButton>
-      </Container>
-      <Container sx={{ display: 'flex', px: '40px' }}>
-        <Container>
-          <form
-            style={{
-              width: '100%',
-              margin: '8px auto',
-              padding: '0 5%',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
-              borderRight: '1px solid #ccc'
-            }}
-          >
-            <FormControl sx={{ display: 'flex' }} fullWidth>
-              <Container
-                sx={{
-                  mt: '20px',
-                  mb: '4px',
-                  p: 0,
-                  border: '1px solid #ccc',
-                  width: '162px',
-                  height: '162px',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}
-              >
-                {image && (
-                  <img
-                    src={image || null}
-                    style={{ width: '160px', height: '160px', borderRadius: '12px' }}
-                    alt="image"
-                  />
-                )}
-              </Container>
-              <Button
-                component="label"
-                role={undefined}
-                variant="contained"
-                tabIndex={-1}
-                sx={{ width: '160px', mx: 'auto' }}
-                startIcon={<CloudUploadIcon />}
-                color="warning"
-              >
-                Upload Img
-                <Input
-                  onChange={(e) => handleUploadImage(e)}
-                  sx={{
-                    clip: 'rect(0 0 0 0)',
-                    clipPath: 'inset(50%)',
-                    height: 1,
-                    overflow: 'hidden',
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    whiteSpace: 'nowrap',
-                    width: 1
-                  }}
-                  type="file"
-                  inputProps={{ accept: 'image/png, image/gif, image/jpeg' }}
-                />
-              </Button>
-            </FormControl>
-            <FormControl fullWidth>
-              <Autocomplete
-                disablePortal
-                options={customerDatas.length > 0 ? customerDatas : []}
-                sx={{ width: '100%' }}
-                getOptionDisabled={(option) => option === receiver}
-                onChange={(e, value) => setSender(value)}
-                renderInput={(params) => <TextField {...params} label="Sender" />}
-              />
-            </FormControl>
-            <FormControl fullWidth>
-              <Autocomplete
-                options={customerDatas.length > 0 ? customerDatas : []}
-                disablePortal
-                getOptionDisabled={(option) => option === sender}
-                sx={{ width: '100%' }}
-                onChange={(e, value) => setReceiver(value)}
-                renderInput={(params) => <TextField {...params} label="Receiver" />}
-              />
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel htmlFor="component-outlined">Note</InputLabel>
-              <Input id="component-outlined" inputRef={note} multiline />
-            </FormControl>
-          </form>
+      <Paper elevation={2} sx={{ py: '10px' }}>
+        <Container sx={{ display: 'flex', justifyContent: 'space-between', mt: '20px' }}>
+          <IconButton onClick={() => navigate(-1)}>
+            <ArrowBackIcon />
+          </IconButton>
         </Container>
-        <Container sx={{ display: 'flex', flexDirection: 'column', gap: '36px' }}>
-          <Container sx={{ p: 0 }}>
-            {sender && receiver && (
-              <Timeline position="alternate">
-                <TimelineItem>
-                  <TimelineSeparator>
-                    <TimelineDot color="success">
-                      <InventoryIcon />
-                    </TimelineDot>
-                    <TimelineConnector />
-                  </TimelineSeparator>
-                  <TimelineContent>
-                    <Typography variant="h6" component="span">
-                      {sender.label}
-                    </Typography>
-                    <Typography>{sender.value.address}</Typography>
-                  </TimelineContent>
-                </TimelineItem>
-                <TimelineItem>
-                  <TimelineSeparator>
-                    <TimelineDot color="secondary">
-                      <SupportAgentIcon />
-                    </TimelineDot>
-                    <TimelineConnector />
-                  </TimelineSeparator>
-                  <TimelineContent>
-                    <Typography variant="h6" component="span">
-                      {currUserName}
-                    </Typography>
-                    <Typography>{currUserAddress}</Typography>
-                  </TimelineContent>
-                </TimelineItem>
-                {locationList.map((location, index) => (
-                  <TimelineItem key={index}>
+        <Container sx={{ display: 'flex', px: '40px' }}>
+          <Container>
+            <form
+              style={{
+                width: '100%',
+                margin: '8px auto',
+                padding: '0 5%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+                borderRight: '1px solid #ccc'
+              }}
+            >
+              <FormControl fullWidth>
+                <Autocomplete
+                  disablePortal
+                  options={customerDatas.length > 0 ? customerDatas : []}
+                  sx={{ width: '100%' }}
+                  getOptionDisabled={(option) => option === receiver}
+                  onChange={(e, value) => setSender(value)}
+                  renderInput={(params) => (
+                    <TextField
+                      error={errors.sender && true}
+                      {...params}
+                      {...register('sender', { required: true })}
+                      label="Sender"
+                      helperText={errors.sender && 'Sender is required'}
+                    />
+                  )}
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <Autocomplete
+                  options={customerDatas.length > 0 ? customerDatas : []}
+                  disablePortal
+                  getOptionDisabled={(option) => option === sender}
+                  sx={{ width: '100%' }}
+                  onChange={(e, value) => setReceiver(value)}
+                  renderInput={(params) => (
+                    <TextField
+                      error={errors.receiver && true}
+                      {...params}
+                      {...register('receiver', { required: true })}
+                      label="Receiver"
+                      helperText={errors.receiver && 'Receiver is required'}
+                    />
+                  )}
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="component-outlined">Note</InputLabel>
+                <Input id="component-outlined" inputRef={note} multiline />
+              </FormControl>
+              <FormControl sx={{ display: 'flex' }} fullWidth>
+                <Container
+                  sx={{
+                    mt: '20px',
+                    mb: '4px',
+                    p: 0,
+                    border: '1px solid #ccc',
+                    borderRadius: '8px',
+                    width: '162px',
+                    height: '162px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundImage: image ? `url(${image.url})` : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'top',
+                    ':hover': {
+                      filter: 'brightness(0.8)',
+                      '& .addIcon': {
+                        display: 'block'
+                      }
+                    }
+                  }}
+                >
+                  <IconButton
+                    component="label"
+                    className="addIcon"
+                    color="inherit"
+                    sx={{ mx: 'auto', display: 'none' }}
+                  >
+                    <AddAPhotoIcon />
+                    <Input
+                      onChange={(e) => handleUploadImage(e)}
+                      sx={{
+                        display: 'none',
+                        overflow: 'hidden',
+                        width: '100%',
+                        height: '100%'
+                      }}
+                      type="file"
+                      inputProps={{ accept: 'image/png, image/gif, image/jpeg' }}
+                    />
+                  </IconButton>
+                </Container>
+              </FormControl>
+            </form>
+          </Container>
+          <Container sx={{ display: 'flex', flexDirection: 'column', gap: '36px' }}>
+            <Container sx={{ p: 0 }}>
+              {sender && receiver && (
+                <Timeline position="alternate">
+                  <TimelineItem>
                     <TimelineSeparator>
-                      <TimelineDot
-                        variant="outlined"
-                        color="error"
-                        onClick={() => handleDeleteLocaltion(index)}
-                      >
-                        <LocalShippingIcon />
+                      <TimelineDot color="success">
+                        <InventoryIcon />
                       </TimelineDot>
                       <TimelineConnector />
                     </TimelineSeparator>
                     <TimelineContent>
                       <Typography variant="h6" component="span">
-                        {location.label}
+                        {sender.label}
                       </Typography>
-                      <Typography>{location.value.address}</Typography>
+                      <Typography>{sender.value.address}</Typography>
                     </TimelineContent>
                   </TimelineItem>
-                ))}
-                <TimelineItem>
-                  <TimelineSeparator>
-                    <TimelineDot
-                      sx={{
-                        cursor: 'pointer'
-                      }}
-                      onClick={handleClickOpenRoute}
-                    >
-                      <AddIcon sx={{ ':hover': { color: grey[800] } }} />
-                    </TimelineDot>
-                    <TimelineConnector />
-                  </TimelineSeparator>
-                  <TimelineContent />
-                </TimelineItem>
-                <TimelineItem>
-                  <TimelineSeparator>
-                    <TimelineDot color="success">
-                      <ReceiptIcon />
-                    </TimelineDot>
-                  </TimelineSeparator>
-                  <TimelineContent>
-                    <Typography variant="h6" component="span">
-                      {receiver.label}
-                    </Typography>
-                    <Typography>{receiver.value.address}</Typography>
-                  </TimelineContent>
-                </TimelineItem>
-              </Timeline>
-            )}
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              elevation={0}
-              onClose={handleCloseRoute}
-              anchorOrigin={{
-                vertical: locationList.length % 2 === 0 ? 'right' : 'bottom',
-                horizontal: locationList.length % 2 === 0 ? 'right' : 'left'
-              }}
-              transformOrigin={{
-                vertical: locationList.length % 2 === 0 ? 'top' : 'center',
-                horizontal: locationList.length % 2 === 0 ? 'left' : 'right'
-              }}
-            >
-              <Container sx={{ width: '240px' }}>
-                <Autocomplete
-                  options={staffDatas.length > 0 ? staffDatas : []}
-                  size="small"
-                  sx={{ width: '100%' }}
-                  getOptionDisabled={(option) => locationList.includes(option)}
-                  onChange={(e, value) => handleSubmitLocation(value)}
-                  renderInput={(params) => <TextField {...params} label="Location" />}
-                />
-              </Container>
-            </Menu>
+                  <TimelineItem>
+                    <TimelineSeparator>
+                      <TimelineDot color="secondary">
+                        <SupportAgentIcon />
+                      </TimelineDot>
+                      <TimelineConnector />
+                    </TimelineSeparator>
+                    <TimelineContent>
+                      <Typography variant="h6" component="span">
+                        {currUserName}
+                      </Typography>
+                      <Typography>{currUserAddress}</Typography>
+                    </TimelineContent>
+                  </TimelineItem>
+                  {locationList.map((location, index) => (
+                    <TimelineItem key={index}>
+                      <TimelineSeparator>
+                        <TimelineDot
+                          variant="outlined"
+                          color="error"
+                          onClick={() => handleDeleteLocation(index)}
+                        >
+                          <LocalShippingIcon />
+                        </TimelineDot>
+                        <TimelineConnector />
+                      </TimelineSeparator>
+                      <TimelineContent>
+                        <Typography variant="h6" component="span">
+                          {location.label}
+                        </Typography>
+                        <Typography>{location.value.address}</Typography>
+                      </TimelineContent>
+                    </TimelineItem>
+                  ))}
+                  <TimelineItem>
+                    <TimelineSeparator>
+                      <TimelineDot
+                        sx={{
+                          cursor: 'pointer'
+                        }}
+                        onClick={handleClickOpenRoute}
+                      >
+                        <AddIcon sx={{ ':hover': { color: grey[800] } }} />
+                      </TimelineDot>
+                      <TimelineConnector />
+                    </TimelineSeparator>
+                    <TimelineContent />
+                  </TimelineItem>
+                  <TimelineItem>
+                    <TimelineSeparator>
+                      <TimelineDot color="success">
+                        <ReceiptIcon />
+                      </TimelineDot>
+                    </TimelineSeparator>
+                    <TimelineContent>
+                      <Typography variant="h6" component="span">
+                        {receiver.label}
+                      </Typography>
+                      <Typography>{receiver.value.address}</Typography>
+                    </TimelineContent>
+                  </TimelineItem>
+                </Timeline>
+              )}
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                elevation={0}
+                onClose={handleCloseRoute}
+                anchorOrigin={{
+                  vertical: locationList.length % 2 === 0 ? 'center' : 'bottom',
+                  horizontal: locationList.length % 2 === 0 ? 'right' : 'left'
+                }}
+                transformOrigin={{
+                  vertical: locationList.length % 2 === 0 ? 'top' : 'center',
+                  horizontal: locationList.length % 2 === 0 ? 'left' : 'right'
+                }}
+              >
+                <Container sx={{ width: '240px' }}>
+                  <Autocomplete
+                    options={staffDatas.length > 0 ? staffDatas : []}
+                    size="small"
+                    sx={{ width: '100%' }}
+                    getOptionDisabled={(option) => locationList.includes(option)}
+                    onChange={(e, value) => handleSelectLocation(value)}
+                    renderInput={(params) => <TextField {...params} label="Location" />}
+                  />
+                </Container>
+              </Menu>
+            </Container>
           </Container>
         </Container>
-      </Container>
-      <Container sx={{ display: 'flex', gap: '8px', mt: '40px', justifyContent: 'flex-end' }}>
-        <Button onClick={handleSubmit} variant="contained">
-          Submit
-        </Button>
-      </Container>
+        <Container sx={{ display: 'flex', gap: '8px', mt: '40px', justifyContent: 'flex-end' }}>
+          <Button onClick={handleSubmit(onSubmit)} variant="contained">
+            Submit
+          </Button>
+        </Container>
+      </Paper>
     </Container>
   );
 }

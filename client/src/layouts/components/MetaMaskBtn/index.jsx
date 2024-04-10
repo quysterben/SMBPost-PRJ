@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Button, Container } from '@mui/material';
 
@@ -8,10 +8,6 @@ import Swal from 'sweetalert2';
 
 export default function MetaMaskBtn() {
   const [connected, setConnected] = useState(false);
-
-  useEffect(() => {
-    connectMetamask();
-  }, []);
 
   const connectMetamask = async () => {
     //check metamask is installed
