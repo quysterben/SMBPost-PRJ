@@ -33,7 +33,5 @@ services:
       - ./server/.env
     networks:
       - smbpost_network
-    expose:
-      - 3000
 networks:
   smbpost_network:

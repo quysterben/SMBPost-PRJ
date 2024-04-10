@@ -33,7 +33,7 @@ app.use(cookieParser())
 // Multer
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/images')
+    cb(null, path.join(__dirname, 'res', 'images'))
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`)
@@ -46,7 +46,7 @@ const fileFilter = (req: Request, file: any, cb: any) => {
     cb(null, false)
   }
 }
-app.use(multer({ storage: fileStorage, fileFilter }).array('image', 10))
+app.use(multer({ storage: fileStorage, fileFilter }).single('image'))
 app.use('/res/images', express.static(path.join(__dirname, 'res', 'images')))
 
 // Routes
