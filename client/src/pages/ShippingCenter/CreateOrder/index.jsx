@@ -35,6 +35,10 @@ import requestApi from '../../../utils/fetchAPI';
 
 import { useForm } from 'react-hook-form';
 
+import Swal from 'sweetalert2';
+
+import { createOrder } from '../../../utils/web3func/orderFuncs';
+
 export default function CreateOrder() {
   const navigate = useNavigate();
 
@@ -92,8 +96,7 @@ export default function CreateOrder() {
       }
     };
 
-    fetchCustomerData();
-    fetchStaffData();
+    Promise.all([fetchCustomerData(), fetchStaffData()]);
     setLoading(false);
   }, []);
 
@@ -121,14 +124,40 @@ export default function CreateOrder() {
   } = useForm();
 
   const onSubmit = async () => {
-    console.log(sender, receiver, locationList, note.current.value, image);
+    if (!image) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please upload an image!'
+      });
+    }
+    if (locationList.length === 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please add location!'
+      });
+    }
+    try {
+      const imageData = new FormData();
+      imageData.append('image', image.image);
+      const resImage = await requestApi('image/upload', 'POST', imageData);
+      console.log(resImage);
+    } catch (err) {
+      console.log(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Something went wrong!'
+      });
+    }
   };
 
   if (loading) return <div>Loading...</div>;
   return (
     <Container>
-      <Paper elevation={2} sx={{ py: '10px' }}>
-        <Container sx={{ display: 'flex', justifyContent: 'space-between', mt: '20px' }}>
+      <Paper elevation={2} sx={{ py: '10px', my: '20px' }}>
+        <Container sx={{ display: 'flex', justifyContent: 'space-between', my: '20px' }}>
           <IconButton onClick={() => navigate(-1)}>
             <ArrowBackIcon />
           </IconButton>
@@ -203,7 +232,7 @@ export default function CreateOrder() {
                     backgroundSize: 'cover',
                     backgroundPosition: 'top',
                     ':hover': {
-                      filter: 'brightness(0.8)',
+                      filter: 'brightness(0.4)',
                       '& .addIcon': {
                         display: 'block'
                       }
@@ -213,8 +242,7 @@ export default function CreateOrder() {
                   <IconButton
                     component="label"
                     className="addIcon"
-                    color="inherit"
-                    sx={{ mx: 'auto', display: 'none' }}
+                    sx={{ mx: 'auto', display: 'none', color: 'white' }}
                   >
                     <AddAPhotoIcon />
                     <Input

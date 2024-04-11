@@ -43,7 +43,7 @@ class ImageController {
         throw error
       }
 
-      const result = await cloudinary.uploader.destroy(extractPublicId(imageURL))
+      await cloudinary.uploader.destroy(extractPublicId(imageURL))
 
       res.status(200).json({
         success: true,

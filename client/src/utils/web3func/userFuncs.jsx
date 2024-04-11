@@ -11,7 +11,7 @@ export const createStorehouse = async (accountAddress, contract, storehouseData)
 };
 
 export const createCustomer = async (accountAddress, contract, customerData) => {
-  return await contract.methods.createCustomer(customerData.email, customerData.phoneNumber).send({
+  return await contract.methods.createCustomer(customerData.email).send({
     from: accountAddress
   });
 };

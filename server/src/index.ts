@@ -19,10 +19,10 @@ import db from './models'
 dotenv.config()
 
 const app: Express = express()
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
-app.use(helmet())
 app.use(cors())
+app.use(express.json())
+app.use(express.urlencoded({ extended: false, parameterLimit: 10000, limit: '10mb' }))
+app.use(helmet())
 
 // Passport
 applyPassportStrategy(passport)

@@ -48,6 +48,9 @@ export default function Sidebar() {
   return (
     <Container
       sx={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
         minWidth: '240px',
         width: '240px',
         height: '100vh',
@@ -57,7 +60,8 @@ export default function Sidebar() {
         borderStyle: 'solid',
         borderColor: 'divider',
         margin: 0,
-        padding: 0
+        padding: 0,
+        zIndex: 10
       }}
     >
       <Container
