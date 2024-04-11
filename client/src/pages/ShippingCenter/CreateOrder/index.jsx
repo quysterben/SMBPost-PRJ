@@ -15,7 +15,7 @@ import {
   Menu,
   Paper
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { LoadingButton } from '@mui/lab';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -38,6 +38,10 @@ import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
 
 import { createOrder } from '../../../utils/web3func/orderFuncs';
+
+import useContractHook from '../../../hooks/useContractHook';
+
+import Loader from '../../../components/Loader';
 
 export default function CreateOrder() {
   const navigate = useNavigate();
@@ -71,7 +75,7 @@ export default function CreateOrder() {
         setCustomerDatas(
           res.data.customers.map((customer) => {
             return {
-              label: customer.username,
+              label: customer.username + ' - ' + customer.phonenumber + ' - ' + customer.address,
               value: customer
             };
           })
@@ -86,7 +90,7 @@ export default function CreateOrder() {
         setStaffDatas(
           res.data.staffs.map((staff) => {
             return {
-              label: staff.username,
+              label: staff.username + ' - ' + staff.phonenumber + ' - ' + staff.address,
               value: staff
             };
           })
@@ -123,6 +127,10 @@ export default function CreateOrder() {
     formState: { errors }
   } = useForm();
 
+  const contract = useContractHook((state) => state.contract);
+  const address = useContractHook((state) => state.account);
+
+  const [submiting, setSubmiting] = useState(false);
   const onSubmit = async () => {
     if (!image) {
       Swal.fire({
@@ -130,6 +138,7 @@ export default function CreateOrder() {
         title: 'Oops...',
         text: 'Please upload an image!'
       });
+      return;
     }
     if (locationList.length === 0) {
       Swal.fire({
@@ -137,12 +146,27 @@ export default function CreateOrder() {
         title: 'Oops...',
         text: 'Please add location!'
       });
+      return;
     }
     try {
+      setSubmiting(true);
       const imageData = new FormData();
       imageData.append('image', image.image);
       const resImage = await requestApi('image/upload', 'POST', imageData);
-      console.log(resImage);
+      const imageURL = resImage.data.imageURL;
+      await createOrder(address, contract, {
+        centerEmail: currUserEmail,
+        senderEmail: sender.value.email,
+        receiverEmail: receiver.value.email,
+        imageURL: imageURL,
+        wayEmails: locationList.map((location) => location.value.email)
+      });
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Order created successfully!'
+      });
+      navigate(-1);
     } catch (err) {
       console.log(err);
       Swal.fire({
@@ -156,12 +180,32 @@ export default function CreateOrder() {
   if (loading) return <div>Loading...</div>;
   return (
     <Container>
-      <Paper elevation={2} sx={{ py: '10px', my: '20px' }}>
-        <Container sx={{ display: 'flex', justifyContent: 'space-between', my: '20px' }}>
-          <IconButton onClick={() => navigate(-1)}>
-            <ArrowBackIcon />
-          </IconButton>
-        </Container>
+      <Container
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '53%',
+          zIndex: 100
+        }}
+      >
+        {submiting && <Loader />}
+      </Container>
+      <Paper
+        elevation={3}
+        sx={{
+          pt: '32px',
+          my: '40px',
+          pb: '20px',
+          minHeight: '600px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px',
+          opacity: submiting ? 0.4 : 1,
+          bgcolor: 'white',
+          pointerEvents: submiting ? 'none' : 'auto',
+          userSelect: submiting ? 'none' : 'auto'
+        }}
+      >
         <Container sx={{ display: 'flex', px: '40px' }}>
           <Container>
             <form
@@ -274,7 +318,7 @@ export default function CreateOrder() {
                     </TimelineSeparator>
                     <TimelineContent>
                       <Typography variant="h6" component="span">
-                        {sender.label}
+                        {sender.value.username}
                       </Typography>
                       <Typography>{sender.value.address}</Typography>
                     </TimelineContent>
@@ -307,7 +351,7 @@ export default function CreateOrder() {
                       </TimelineSeparator>
                       <TimelineContent>
                         <Typography variant="h6" component="span">
-                          {location.label}
+                          {location.value.username}
                         </Typography>
                         <Typography>{location.value.address}</Typography>
                       </TimelineContent>
@@ -335,7 +379,7 @@ export default function CreateOrder() {
                     </TimelineSeparator>
                     <TimelineContent>
                       <Typography variant="h6" component="span">
-                        {receiver.label}
+                        {receiver.value.username}
                       </Typography>
                       <Typography>{receiver.value.address}</Typography>
                     </TimelineContent>
@@ -371,8 +415,11 @@ export default function CreateOrder() {
           </Container>
         </Container>
         <Container sx={{ display: 'flex', gap: '8px', mt: '40px', justifyContent: 'flex-end' }}>
-          <Button onClick={handleSubmit(onSubmit)} variant="contained">
+          <LoadingButton loading={submiting} onClick={handleSubmit(onSubmit)} variant="contained">
             Submit
+          </LoadingButton>
+          <Button variant="outlined" onClick={() => navigate(-1)}>
+            Back
           </Button>
         </Container>
       </Paper>
