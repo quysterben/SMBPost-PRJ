@@ -51,3 +51,13 @@ export const getAllOrders = async (accountAdrress, contract) => {
     console.log(err);
   }
 };
+
+export const getOrdersByMail = async (accountAdrress, contract, email) => {
+  try {
+    const res = await contract.methods.getOrderByEmail(email).call({ from: accountAdrress });
+    console.log(res);
+    return res;
+  } catch (err) {
+    console.log(err);
+  }
+};

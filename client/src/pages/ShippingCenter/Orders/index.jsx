@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import useContractHook from '../../../hooks/useContractHook';
-import useUserHook from '../../../hooks/useStaffHook';
 
 import {
   Container,
@@ -19,10 +18,13 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
-import { getAllOrders } from '../../../utils/web3func/orderFuncs';
-
 import Loader from '../../../components/Loader';
 import AnimationButton from '../../../components/AnimationButton';
+import UserDetailDiablog from '../../../components/UserDetailDiablog';
+
+import requestAPI from '../../../utils/fetchAPI';
+
+import { getAllOrders } from '../../../utils/web3func/orderFuncs';
 
 export default function CenterOrders() {
   const navigate = useNavigate();
@@ -32,15 +34,26 @@ export default function CenterOrders() {
   const contract = useContractHook((state) => state.contract);
   const account = useContractHook((state) => state.account);
 
-  const userDatas = useUserHook((state) => state.userDatas);
-  const getUserDatas = useUserHook((state) => state.getUserDatas);
-
   const [orderDatas, setOrderDatas] = useState([]);
+
+  //   DiablogHandle
+  const [open, setOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState();
+
+  const handleClickOpen = (user) => {
+    setSelectedUser(user);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   useEffect(() => {
     const fetchOrders = async () => {
       const orders = await getAllOrders(account, contract);
-      await getUserDatas();
+      const userDatasRes = await requestAPI('user', 'GET');
+      const userDatas = userDatasRes.data.users;
       setOrderDatas(
         orders.map((param) => {
           const nowAtEmail = param.histories[param.histories.length - 1].posEmail;
@@ -58,6 +71,10 @@ export default function CenterOrders() {
 
     if (!contract || !account) return;
     fetchOrders().then(() => console.log('Fetch orders done'));
+
+    return () => {
+      setOrderDatas([]);
+    };
   }, [contract, account]);
 
   if (loading)
@@ -113,10 +130,19 @@ export default function CenterOrders() {
                 >
                   <TableCell>{order.orderID.slice(0, 12) + '...'}</TableCell>
                 </Tooltip>
-                <TableCell>{order.sender.username}</TableCell>
-                <TableCell>{order.receiver.username}</TableCell>
+                <TableCell sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(order.sender)}>
+                  {order.sender.username}
+                </TableCell>
+                <TableCell
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() => handleClickOpen(order.receiver)}
+                >
+                  {order.receiver.username}
+                </TableCell>
                 <TableCell>{order.status}</TableCell>
-                <TableCell>{order.nowAt.username}</TableCell>
+                <TableCell sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(order.nowAt)}>
+                  {order.nowAt.username}
+                </TableCell>
                 <TableCell>{order.note}</TableCell>
                 <TableCell>
                   <Button
@@ -132,6 +158,7 @@ export default function CenterOrders() {
           </TableBody>
         </Table>
       </TableContainer>
+      <UserDetailDiablog open={open} onClose={handleClose} user={selectedUser} />
     </Container>
   );
 }
