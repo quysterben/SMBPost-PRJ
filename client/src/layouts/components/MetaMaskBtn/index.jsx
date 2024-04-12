@@ -15,14 +15,12 @@ export default function MetaMaskBtn() {
   const account = useContractHook((state) => state.account);
   const setAccount = useContractHook((state) => state.setAccount);
   useEffect(() => {
-    console.log(contract, account);
     if (contract && account !== '' && account !== undefined) {
-      console.log(contract, account);
       setConnected(true);
     } else {
       setConnected(false);
     }
-  }, [contract, account]);
+  }, [account]);
 
   const connectMetamask = async () => {
     //check metamask is installed

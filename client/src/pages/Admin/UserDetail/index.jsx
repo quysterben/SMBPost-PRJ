@@ -13,8 +13,10 @@ import convertRoleToText from '../../../utils/convertRoleToText';
 import useContractHook from '../../../hooks/useContractHook';
 
 import {
+  createCustomer,
   createShipping,
   createStorehouse,
+  removeCustomer,
   removeShippingCenter,
   removeStorehouse
 } from '../../../utils/web3func/userFuncs';
@@ -68,8 +70,17 @@ export default function UserDetail() {
           title: 'Success',
           text: 'Active account successfully!'
         });
-      } else {
+      } else if (userData.role === 'storehouse') {
         await createStorehouse(address, contract, {
+          email: userData.email
+        });
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Active account successfully!'
+        });
+      } else {
+        await createCustomer(address, contract, {
           email: userData.email
         });
         Swal.fire({
@@ -111,8 +122,15 @@ export default function UserDetail() {
           title: 'Success',
           text: 'Deactive account successfully!'
         });
-      } else {
+      } else if (userData.role === 'storehouse') {
         await removeStorehouse(address, contract, userData.email);
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Deactive account successfully!'
+        });
+      } else {
+        await removeCustomer(address, contract, userData.email);
         Swal.fire({
           icon: 'success',
           title: 'Success',
