@@ -1,13 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button, Container } from '@mui/material';
+import { blue, green, grey } from '@mui/material/colors';
 
 import Web3 from 'web3';
-import { blue, green, grey } from '@mui/material/colors';
 import Swal from 'sweetalert2';
+
+import useContractHook from '../../../hooks/useContractHook';
 
 export default function MetaMaskBtn() {
   const [connected, setConnected] = useState(false);
+
+  const contract = useContractHook((state) => state.contract);
+  const account = useContractHook((state) => state.account);
+  const setAccount = useContractHook((state) => state.setAccount);
+  useEffect(() => {
+    console.log(contract, account);
+    if (contract && account !== '' && account !== undefined) {
+      console.log(contract, account);
+      setConnected(true);
+    } else {
+      setConnected(false);
+    }
+  }, [contract, account]);
 
   const connectMetamask = async () => {
     //check metamask is installed
@@ -27,9 +42,11 @@ export default function MetaMaskBtn() {
 
       //get the connected accounts
       const accounts = await web3.eth.getAccounts();
+      //set the connected account to the state
+      setAccount(accounts[0]);
 
       //show the first connected account in the react page
-      setConnected(accounts[0]);
+      setConnected(true);
     } else {
       alert('Please download metamask');
     }
@@ -46,7 +63,7 @@ export default function MetaMaskBtn() {
         gap: '24px'
       }}
     >
-      {connected ? (
+      {connected && account ? (
         <Container>
           <Button
             size="medium"
@@ -54,7 +71,7 @@ export default function MetaMaskBtn() {
             variant="contained"
             sx={{ width: '100%', bgcolor: green[100], fontSize: '12px' }}
           >
-            {connected.slice(0, 16) + '...'}
+            {account.slice(0, 16) + '...'}
           </Button>
         </Container>
       ) : (
@@ -70,7 +87,7 @@ export default function MetaMaskBtn() {
             }}
             size="medium"
             variant="contained"
-            onClick={() => connectMetamask()}
+            onClick={connectMetamask}
           >
             Connect to MetaMask
           </Button>

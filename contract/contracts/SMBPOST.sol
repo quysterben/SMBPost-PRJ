@@ -18,7 +18,6 @@ contract SMBPOST {
         string posEmail;
     }
 
-
     struct Order {
         string senderEmail;
         string receiverEmail;
@@ -53,7 +52,7 @@ contract SMBPOST {
 
     receive() external payable {}
 
-    function orderExists(string memory _orderID) public payable returns (bool) {
+    function orderExists(string memory _orderID) public view returns (bool) {
         return bytes(ordersList[_orderID].senderEmail).length > 0;
     }
 
@@ -105,13 +104,13 @@ contract SMBPOST {
         ordersList[_orderID] = newOrder;
         orderIDs.push(_orderID);
 
-        for (uint256 i = 0; i < _wayEmails.length - 1; i++) {
+        for (uint256 i = 0; i < _wayEmails.length; i++) {
             ordersList[_orderID].wayEmails.push(_wayEmails[i]);
         }
 
         return true;
     }
-    
+
     function getOrderDetail(string memory _orderID)
         public
         view
@@ -371,10 +370,11 @@ contract SMBPOST {
             keccak256(abi.encodePacked(str2));
     }
 
-    function findOrderByWays(
-        string[] memory ways,
-        string memory _email
-    ) internal pure returns (bool) {
+    function findOrderByWays(string[] memory ways, string memory _email)
+        internal
+        pure
+        returns (bool)
+    {
         for (uint256 i = 0; i < ways.length; i++) {
             if (compareTwoStrings(ways[i], _email)) {
                 return true;

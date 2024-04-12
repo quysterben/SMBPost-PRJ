@@ -168,7 +168,7 @@ export default function CreateOrder() {
       });
       navigate(-1);
     } catch (err) {
-      console.log(err);
+      console.log(err.message);
       Swal.fire({
         icon: 'error',
         title: 'Oops...',

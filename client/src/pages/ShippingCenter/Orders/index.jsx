@@ -1,4 +1,8 @@
+/* eslint-disable no-unused-vars */
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import useContractHook from '../../../hooks/useContractHook';
 
 import {
   Container,
@@ -13,8 +17,25 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
+import { getAllOrders } from '../../../utils/web3func/orderFuncs';
+
 export default function CenterOrders() {
   const navigate = useNavigate();
+
+  const contract = useContractHook((state) => state.contract);
+  const account = useContractHook((state) => state.account);
+
+  const [orderDatas, setOrderDatas] = useState([]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const orders = await getAllOrders(account, contract);
+      console.log(orders);
+      setOrderDatas(orders);
+    };
+
+    fetchOrders().then(() => console.log('Fetch orders done'));
+  }, []);
 
   return (
     <Container sx={{ bgcolor: grey[100], flex: 1, height: '100vh', margin: 0, padding: 0 }}>

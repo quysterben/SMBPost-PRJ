@@ -14,8 +14,7 @@ import useContractHook from './hooks/useContractHook';
 
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
-import contractInfo from './utils/SMBPOST.json';
-import { ContractAddress } from './const';
+import contractInfo from './utils/contract-info.json';
 
 function App() {
   const web3 = useContractHook((state) => state.web3);
@@ -27,7 +26,10 @@ function App() {
       try {
         const provider = await detectEthereumProvider();
         const web3 = new Web3(provider);
-        const contract = new web3.eth.Contract(contractInfo.abi, ContractAddress);
+        const contract = new web3.eth.Contract(
+          contractInfo.contractABI,
+          contractInfo.contractAddress
+        );
         if (provider) {
           provider.on('accountsChanged', (accounts) => {
             setAccount(accounts[0]);
