@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import useContractHook from '../../../hooks/useContractHook';
+import useUserHook from '../../../hooks/useStaffHook';
 
 import {
   Container,
@@ -12,13 +14,15 @@ import {
   TableCell,
   TableBody,
   Paper,
-  Button
+  Button,
+  Tooltip
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
 import { getAllOrders } from '../../../utils/web3func/orderFuncs';
 
 import Loader from '../../../components/Loader';
+import AnimationButton from '../../../components/AnimationButton';
 
 export default function CenterOrders() {
   const navigate = useNavigate();
@@ -28,12 +32,27 @@ export default function CenterOrders() {
   const contract = useContractHook((state) => state.contract);
   const account = useContractHook((state) => state.account);
 
+  const userDatas = useUserHook((state) => state.userDatas);
+  const getUserDatas = useUserHook((state) => state.getUserDatas);
+
   const [orderDatas, setOrderDatas] = useState([]);
 
   useEffect(() => {
     const fetchOrders = async () => {
       const orders = await getAllOrders(account, contract);
-      setOrderDatas(orders);
+      await getUserDatas();
+      setOrderDatas(
+        orders.map((param) => {
+          const nowAtEmail = param.histories[param.histories.length - 1].posEmail;
+          return {
+            orderID: param.orderID,
+            sender: userDatas.find((user) => user.email === param.senderEmail),
+            receiver: userDatas.find((user) => user.email === param.receiverEmail),
+            status: param.status,
+            nowAt: userDatas.find((user) => user.email === nowAtEmail)
+          };
+        })
+      );
       setLoading(false);
     };
 
@@ -47,6 +66,7 @@ export default function CenterOrders() {
         <Loader />
       </Container>
     );
+
   return (
     <Container sx={{ bgcolor: grey[100], flex: 1, height: '100vh', margin: 0, padding: 0 }}>
       <Container
@@ -57,9 +77,7 @@ export default function CenterOrders() {
           height: '48px'
         }}
       >
-        <Button onClick={() => navigate('create')} variant="contained">
-          Create new order
-        </Button>
+        <AnimationButton navigateLink={'create'} />
       </Container>
       <TableContainer sx={{ width: '96%', mx: 'auto', mt: '12px' }} component={Paper}>
         <Table aria-label="User management">
@@ -77,15 +95,32 @@ export default function CenterOrders() {
           <TableBody>
             {orderDatas.map((order, index) => (
               <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell>{order.orderID}</TableCell>
-                <TableCell>{order.senderEmail}</TableCell>
-                <TableCell>{order.receiverEmail}</TableCell>
+                <Tooltip
+                  title={order.orderID}
+                  placement="bottom"
+                  slotProps={{
+                    popper: {
+                      modifiers: [
+                        {
+                          name: 'offset',
+                          options: {
+                            offset: [24, -32]
+                          }
+                        }
+                      ]
+                    }
+                  }}
+                >
+                  <TableCell>{order.orderID.slice(0, 12) + '...'}</TableCell>
+                </Tooltip>
+                <TableCell>{order.sender.username}</TableCell>
+                <TableCell>{order.receiver.username}</TableCell>
                 <TableCell>{order.status}</TableCell>
-                <TableCell>{order.histories[order.histories.length - 1].posEmail}</TableCell>
+                <TableCell>{order.nowAt.username}</TableCell>
                 <TableCell>{order.note}</TableCell>
                 <TableCell>
                   <Button
-                    onClick={() => navigate(`order/${order.orderID}`)}
+                    onClick={() => navigate(`${order.orderID}`)}
                     variant="contained"
                     color="primary"
                   >

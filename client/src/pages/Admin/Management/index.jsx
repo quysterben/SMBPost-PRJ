@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 
 import { useNavigate } from 'react-router-dom';
@@ -27,8 +26,6 @@ import convertRoleToText from '../../../utils/convertRoleToText';
 export default function Management() {
   const navigate = useNavigate();
   const [userDatas, setUserDatas] = useState([]);
-
-  const [status, setStatus] = useState('all');
 
   const fetchUserData = async () => {
     try {
