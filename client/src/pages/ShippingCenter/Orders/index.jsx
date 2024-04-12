@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,8 +18,12 @@ import { grey } from '@mui/material/colors';
 
 import { getAllOrders } from '../../../utils/web3func/orderFuncs';
 
+import Loader from '../../../components/Loader';
+
 export default function CenterOrders() {
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(true);
 
   const contract = useContractHook((state) => state.contract);
   const account = useContractHook((state) => state.account);
@@ -30,13 +33,20 @@ export default function CenterOrders() {
   useEffect(() => {
     const fetchOrders = async () => {
       const orders = await getAllOrders(account, contract);
-      console.log(orders);
       setOrderDatas(orders);
+      setLoading(false);
     };
 
+    if (!contract || !account) return;
     fetchOrders().then(() => console.log('Fetch orders done'));
-  }, []);
+  }, [contract, account]);
 
+  if (loading)
+    return (
+      <Container sx={{ position: 'fixed', top: '50%', left: '50%' }}>
+        <Loader />
+      </Container>
+    );
   return (
     <Container sx={{ bgcolor: grey[100], flex: 1, height: '100vh', margin: 0, padding: 0 }}>
       <Container
@@ -64,7 +74,27 @@ export default function CenterOrders() {
               <TableCell>Action</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody></TableBody>
+          <TableBody>
+            {orderDatas.map((order, index) => (
+              <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableCell>{order.orderID}</TableCell>
+                <TableCell>{order.senderEmail}</TableCell>
+                <TableCell>{order.receiverEmail}</TableCell>
+                <TableCell>{order.status}</TableCell>
+                <TableCell>{order.histories[order.histories.length - 1].posEmail}</TableCell>
+                <TableCell>{order.note}</TableCell>
+                <TableCell>
+                  <Button
+                    onClick={() => navigate(`order/${order.orderID}`)}
+                    variant="contained"
+                    color="primary"
+                  >
+                    Detail
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
       </TableContainer>
     </Container>

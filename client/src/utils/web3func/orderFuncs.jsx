@@ -33,8 +33,21 @@ export const createOrder = async (accountArress, contract, orderData) => {
 
 export const getAllOrders = async (accountAdrress, contract) => {
   try {
-    const data = await contract.methods.getAllOrders().call({ from: accountAdrress });
-    return data;
+    const res = await contract.methods.getAllOrders().call({ from: accountAdrress });
+    console.log(res);
+    const result = res[0].map((order, index) => {
+      return {
+        orderID: res[1][index],
+        receiverEmail: order.receiverEmail,
+        senderEmail: order.senderEmail,
+        status: order.status,
+        note: order.note,
+        imageURL: order.imageURL,
+        histories: order.histories,
+        wayEmails: order.wayEmails
+      };
+    });
+    return result;
   } catch (err) {
     console.log(err);
   }
