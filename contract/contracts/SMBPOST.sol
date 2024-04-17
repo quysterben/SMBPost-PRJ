@@ -4,12 +4,6 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 
 contract SMBPOST {
-    enum OrderStatus {
-        InTransit,
-        Delivered,
-        Cancelled
-    }
-
     struct HistoryOrder {
         uint256 timestamp;
         string date;
@@ -23,7 +17,6 @@ contract SMBPOST {
         string receiverEmail;
         string note;
         string imageURL;
-        OrderStatus status;
         string[] wayEmails;
         HistoryOrder[] histories;
     }
@@ -111,7 +104,9 @@ contract SMBPOST {
         return true;
     }
 
-    function getOrderDetail(string memory _orderID)
+    function getOrderDetail(
+        string memory _orderID
+    )
         public
         view
         returns (
@@ -133,11 +128,9 @@ contract SMBPOST {
         );
     }
 
-    function createCustomer(string memory _email)
-        public
-        payable
-        returns (bool)
-    {
+    function createCustomer(
+        string memory _email
+    ) public payable returns (bool) {
         require(bytes(_email).length > 0, "Email is required");
         require(
             !(bytes(customersList[_email].email).length > 0),
@@ -156,11 +149,9 @@ contract SMBPOST {
         return true;
     }
 
-    function createShippingCenter(string memory _email)
-        public
-        payable
-        returns (bool)
-    {
+    function createShippingCenter(
+        string memory _email
+    ) public payable returns (bool) {
         require(bytes(_email).length > 0, "Email is required");
         require(
             !(bytes(shippingCentersList[_email].email).length > 0),
@@ -173,11 +164,9 @@ contract SMBPOST {
         return true;
     }
 
-    function createStorehouse(string memory _email)
-        public
-        payable
-        returns (bool)
-    {
+    function createStorehouse(
+        string memory _email
+    ) public payable returns (bool) {
         require(bytes(_email).length > 0, "Email is required");
         require(
             !(bytes(storehousesList[_email].email).length > 0),
@@ -231,8 +220,6 @@ contract SMBPOST {
         );
         require(bytes(_transferDate).length > 0, "Moving date cannot be empty");
 
-        order.status = OrderStatus.Delivered;
-
         HistoryOrder memory newHistory;
         newHistory.timestamp = block.timestamp;
         newHistory.date = _transferDate;
@@ -250,19 +237,8 @@ contract SMBPOST {
         string memory _canceledDate,
         string memory _reason
     ) public payable returns (bool) {
-        Order storage order = ordersList[_orderID];
         require(orderExists(_orderID), "Order must be exist");
-        require(
-            order.status != OrderStatus.Cancelled,
-            "Order must be in system"
-        );
-        require(
-            order.status != OrderStatus.Delivered,
-            "Order must be in system"
-        );
         require(bytes(_canceledDate).length > 0, "Canceled date is required");
-
-        order.status = OrderStatus.Cancelled;
 
         HistoryOrder memory newHistory;
         newHistory.timestamp = block.timestamp;
@@ -289,11 +265,9 @@ contract SMBPOST {
         return (orders, orderIDs);
     }
 
-    function getOrderByEmail(string memory _email)
-        public
-        view
-        returns (Order[] memory, string[] memory)
-    {
+    function getOrderByStaffEmail(
+        string memory _email
+    ) public view returns (Order[] memory, string[] memory) {
         uint256 orderCount = 0;
 
         for (uint256 i = 0; i < orderIDs.length; i++) {
@@ -321,11 +295,42 @@ contract SMBPOST {
         return (orders, ids);
     }
 
-    function removeShoppingCenter(string memory _email)
-        public
-        payable
-        returns (bool)
-    {
+    function getOrderByCustomerEmail(
+        string memory _email
+    ) public view returns (Order[] memory, string[] memory) {
+        uint256 orderCount = 0;
+        for (uint256 i = 0; i < orderIDs.length; i++) {
+            string memory orderID = orderIDs[i];
+            if (
+                compareTwoStrings(ordersList[orderID].senderEmail, _email) ||
+                compareTwoStrings(ordersList[orderID].receiverEmail, _email)
+            ) {
+                orderCount++;
+            }
+        }
+
+        Order[] memory orders = new Order[](orderCount);
+        string[] memory ids = new string[](orderCount);
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < orderIDs.length; i++) {
+            string memory orderID = orderIDs[i];
+            if (
+                compareTwoStrings(ordersList[orderID].senderEmail, _email) ||
+                compareTwoStrings(ordersList[orderID].receiverEmail, _email)
+            ) {
+                orders[index] = ordersList[orderID];
+                ids[index] = orderID;
+                index++;
+            }
+        }
+
+        return (orders, ids);
+    }
+
+    function removeShoppingCenter(
+        string memory _email
+    ) public payable returns (bool) {
         require(
             bytes(shippingCentersList[_email].email).length > 0,
             "Shipping center does not exist"
@@ -334,11 +339,9 @@ contract SMBPOST {
         return true;
     }
 
-    function removeStorehouse(string memory _email)
-        public
-        payable
-        returns (bool)
-    {
+    function removeStorehouse(
+        string memory _email
+    ) public payable returns (bool) {
         require(
             bytes(storehousesList[_email].email).length > 0,
             "Storehouse does not exist"
@@ -347,11 +350,9 @@ contract SMBPOST {
         return true;
     }
 
-    function removeCustomer(string memory _email)
-        public
-        payable
-        returns (bool)
-    {
+    function removeCustomer(
+        string memory _email
+    ) public payable returns (bool) {
         require(
             bytes(customersList[_email].email).length > 0,
             "Customer does not exist"
@@ -360,21 +361,19 @@ contract SMBPOST {
         return true;
     }
 
-    function compareTwoStrings(string memory str1, string memory str2)
-        internal
-        pure
-        returns (bool)
-    {
+    function compareTwoStrings(
+        string memory str1,
+        string memory str2
+    ) internal pure returns (bool) {
         return
             keccak256(abi.encodePacked(str1)) ==
             keccak256(abi.encodePacked(str2));
     }
 
-    function findOrderByWays(string[] memory ways, string memory _email)
-        internal
-        pure
-        returns (bool)
-    {
+    function findOrderByWays(
+        string[] memory ways,
+        string memory _email
+    ) internal pure returns (bool) {
         for (uint256 i = 0; i < ways.length; i++) {
             if (compareTwoStrings(ways[i], _email)) {
                 return true;

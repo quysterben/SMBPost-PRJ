@@ -1,18 +1,17 @@
-/* eslint-disable no-unused-vars */
 import { Dialog, Avatar, Container, useMediaQuery, Typography, Chip } from '@mui/material';
 import ContactPhoneRoundedIcon from '@mui/icons-material/ContactPhoneRounded';
 import ContactMailRoundedIcon from '@mui/icons-material/ContactMailRounded';
 import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
+import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import { useTheme } from '@mui/material/styles';
 
 import Proptypes from 'prop-types';
+import { useEffect, useState } from 'react';
+import useContractHook from '../../hooks/useContractHook';
 
 import convertRoleToText from '../../utils/convertRoleToText';
-import { useEffect } from 'react';
-
-import { getOrdersByMail } from '../../utils/web3func/orderFuncs';
-
-import useContractHook from '../../hooks/useContractHook';
+import { getOrdersByCustomerEmail, getOrdersByStaffEmail } from '../../utils/web3func/orderFuncs';
 
 export default function UserDetailDiablog(props) {
   const { onClose, open, user } = props;
@@ -27,9 +26,21 @@ export default function UserDetailDiablog(props) {
   const contract = useContractHook((state) => state.contract);
   const account = useContractHook((state) => state.account);
 
+  const [orderCount, setOrderCount] = useState(0);
+
   useEffect(() => {
     const fetchOrder = async () => {
-      const res = await getOrdersByMail(account, contract, user.email);
+      try {
+        let res = null;
+        if (user.role === 'customer') {
+          res = await getOrdersByCustomerEmail(account, contract, user.email);
+        } else {
+          res = await getOrdersByStaffEmail(account, contract, user.email);
+        }
+        setOrderCount(res[0].length);
+      } catch (err) {
+        console.log(err);
+      }
     };
 
     if (!user && !open) return;
@@ -75,6 +86,18 @@ export default function UserDetailDiablog(props) {
           </Container>
           <Typography sx={{ width: '60%', fontSize: '12px', color: 'gray' }} variant="body1">
             {user.address}
+          </Typography>
+        </Container>
+        <Container sx={{ display: 'flex', alignItems: 'center' }}>
+          <Container sx={{ width: '40%', textJustify: 'auto', mt: '0.8px' }}>
+            {user.role !== 'customer' ? (
+              <LocalShippingOutlinedIcon color="primary" fontSize="medium" />
+            ) : (
+              <InventoryOutlinedIcon color="primary" fontSize="medium" />
+            )}
+          </Container>
+          <Typography sx={{ width: '60%', fontSize: '12px', color: 'gray' }} variant="body1">
+            {orderCount}
           </Typography>
         </Container>
       </Container>

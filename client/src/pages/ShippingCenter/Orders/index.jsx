@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,7 +13,8 @@ import {
   TableBody,
   Paper,
   Button,
-  Tooltip
+  Tooltip,
+  Chip
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
@@ -25,6 +25,7 @@ import UserDetailDiablog from '../../../components/UserDetailDiablog';
 import requestAPI from '../../../utils/fetchAPI';
 
 import { getAllOrders } from '../../../utils/web3func/orderFuncs';
+import convertHistoryToStatus from '../../../utils/convertHistoryToStatus';
 
 export default function CenterOrders() {
   const navigate = useNavigate();
@@ -57,11 +58,14 @@ export default function CenterOrders() {
       setOrderDatas(
         orders.map((param) => {
           const nowAtEmail = param.histories[param.histories.length - 1].posEmail;
+          console.log(param);
           return {
             orderID: param.orderID,
             sender: userDatas.find((user) => user.email === param.senderEmail),
             receiver: userDatas.find((user) => user.email === param.receiverEmail),
-            status: param.status,
+            status: convertHistoryToStatus(param.histories[param.histories.length - 1]).text,
+            statusColor: convertHistoryToStatus(param.histories[param.histories.length - 1]).color,
+            note: param.note,
             nowAt: userDatas.find((user) => user.email === nowAtEmail)
           };
         })
@@ -139,7 +143,9 @@ export default function CenterOrders() {
                 >
                   {order.receiver.username}
                 </TableCell>
-                <TableCell>{order.status}</TableCell>
+                <TableCell>
+                  <Chip variant="filled" label={order.status} color={order.statusColor} />
+                </TableCell>
                 <TableCell sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(order.nowAt)}>
                   {order.nowAt.username}
                 </TableCell>
