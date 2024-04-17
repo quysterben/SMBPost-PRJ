@@ -70,3 +70,12 @@ export const getOrdersByCustomerEmail = async (accountAdrress, contract, email) 
     console.log(err);
   }
 };
+
+export const getOrderById = async (accountAdrress, contract, orderID) => {
+  try {
+    const res = await contract.methods.getOrderDetail(orderID).call({ from: accountAdrress });
+    return res;
+  } catch (err) {
+    console.log(err);
+  }
+};

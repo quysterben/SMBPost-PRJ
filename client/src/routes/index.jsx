@@ -10,6 +10,7 @@ import Overview from '../pages/Admin/Overview';
 import CenterOverview from '../pages/ShippingCenter/Overview';
 import CenterOrders from '../pages/ShippingCenter/Orders';
 import CreateOrder from '../pages/ShippingCenter/CreateOrder';
+import OrderDetail from '../pages/ShippingCenter/OrderDetail';
 
 import Verify from '../pages/Common/Verify';
 
@@ -42,6 +43,12 @@ const privateRoutes = [
   {
     path: '/center/orders/create',
     component: CreateOrder,
+    layout: DefaultLayout,
+    role: 'shippingCenter'
+  },
+  {
+    path: '/center/orders/:id',
+    component: OrderDetail,
     layout: DefaultLayout,
     role: 'shippingCenter'
   },

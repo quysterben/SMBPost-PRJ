@@ -1,5 +1,4 @@
 const convertHistoryToStatus = (history) => {
-  console.log(history.action);
   if (history.action === 'Requested') {
     return { text: 'Requested', color: 'warning' };
   } else if (history.action === 'Move to storehouse') {
