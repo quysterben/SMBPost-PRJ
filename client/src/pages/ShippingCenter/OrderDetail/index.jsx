@@ -25,6 +25,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import { grey } from '@mui/material/colors';
 import TransferButton from '../../../components/TransferButton';
+import UserDetailDiablog from '../../../components/UserDetailDiablog';
+import MovingTruck from '../../../components/MovingTruck';
 
 export default function OrderDetail() {
   const { id } = useParams();
@@ -90,6 +92,20 @@ export default function OrderDetail() {
     }
   };
 
+  //   userDetailDialog
+  const [open, setOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState();
+
+  const handleClickOpen = (userEmail) => {
+    const user = userDatas.find((param) => param.email === userEmail);
+    setSelectedUser(user);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   if (isLoading) return <div>Loading...</div>;
   return (
     <Container>
@@ -110,7 +126,11 @@ export default function OrderDetail() {
             <ArrowBackIcon />
           </IconButton>
           <Typography variant="h6">Order Tracking</Typography>
-          <TransferButton onClickAction={() => moveToStorehouse()} />
+          {historyDatas.length === 1 ? (
+            <TransferButton onClickAction={() => moveToStorehouse()} />
+          ) : (
+            <Chip label="Intransit" variant="outlined" color="primary" />
+          )}
         </Container>
         <Container
           sx={{ px: '80px', borderTopWidth: '1px', borderStyle: 'solid', borderColor: grey[100] }}
@@ -234,13 +254,14 @@ export default function OrderDetail() {
         <Container sx={{ mt: '60px' }}>
           <Stepper variant="progress" activeStep={historyDatas.length + 1} alternativeLabel>
             {trackerDatas.map((label, index) => (
-              <Step key={index}>
+              <Step sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(label)} key={index}>
                 <StepLabel>{userDatas.find((param) => param.email === label).username}</StepLabel>
               </Step>
             ))}
           </Stepper>
         </Container>
       </Paper>
+      <UserDetailDiablog open={open} onClose={handleClose} user={selectedUser} />
     </Container>
   );
 }

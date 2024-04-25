@@ -5,7 +5,7 @@ export const createOrder = async (accountArress, contract, orderData) => {
   const orderID = uuidv4();
   const timestampNow = moment().format('YYYY-MM-DD HH:mm:ss').toString();
   const submitData = {
-    orderID: orderID,
+    orderID: orderID.slice(0, 8),
     centerEmail: orderData.centerEmail,
     senderEmail: orderData.senderEmail,
     receiverEmail: orderData.receiverEmail,

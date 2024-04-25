@@ -13,6 +13,8 @@ import CreateOrder from '../pages/ShippingCenter/CreateOrder';
 import OrderDetail from '../pages/ShippingCenter/OrderDetail';
 
 import Verify from '../pages/Common/Verify';
+import VerifyByID from '../pages/Common/Verify/VerifyByID';
+import VerifyByQrCode from '../pages/Common/Verify/VerifyByQrCode';
 
 const publicRoutes = [{ path: '/login', component: Login, layout: null }];
 
@@ -54,7 +56,10 @@ const privateRoutes = [
   },
 
   { path: '*', component: NotFound, layout: DefaultLayout },
-  { path: '/verify', component: Verify, layout: DefaultLayout }
+  { path: '/verify', component: Verify, layout: DefaultLayout },
+
+  { path: '/verify/by-id', component: VerifyByID, layout: DefaultLayout },
+  { path: '/verify/by-qr-code', component: VerifyByQrCode, layout: DefaultLayout }
 ];
 
 export { publicRoutes, privateRoutes };

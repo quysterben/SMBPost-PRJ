@@ -132,7 +132,7 @@ export default function CenterOrders() {
                     }
                   }}
                 >
-                  <TableCell>{order.orderID.slice(0, 12) + '...'}</TableCell>
+                  <TableCell>{order.orderID.slice(0, 12)}</TableCell>
                 </Tooltip>
                 <TableCell sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(order.sender)}>
                   {order.sender.username}
