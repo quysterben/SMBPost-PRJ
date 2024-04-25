@@ -89,8 +89,7 @@ export default function UserDetail() {
           text: 'Active account successfully!'
         });
       }
-      const res = await requestApi(`user/active/${id}`, 'PUT');
-      console.log(res);
+      await requestApi(`user/active/${id}`, 'PUT');
       fetchData();
     } catch (err) {
       console.log(err);
@@ -137,8 +136,7 @@ export default function UserDetail() {
           text: 'Deactive account successfully!'
         });
       }
-      const res = await requestApi(`user/active/${id}`, 'PUT');
-      console.log(res);
+      await requestApi(`user/active/${id}`, 'PUT');
       fetchData();
     } catch (err) {
       console.log(err);

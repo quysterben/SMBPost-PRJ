@@ -104,9 +104,7 @@ contract SMBPOST {
         return true;
     }
 
-    function getOrderDetail(
-        string memory _orderID
-    )
+    function getOrderDetail(string memory _orderID)
         public
         view
         returns (
@@ -128,9 +126,11 @@ contract SMBPOST {
         );
     }
 
-    function createCustomer(
-        string memory _email
-    ) public payable returns (bool) {
+    function createCustomer(string memory _email)
+        public
+        payable
+        returns (bool)
+    {
         require(bytes(_email).length > 0, "Email is required");
         require(
             !(bytes(customersList[_email].email).length > 0),
@@ -149,9 +149,11 @@ contract SMBPOST {
         return true;
     }
 
-    function createShippingCenter(
-        string memory _email
-    ) public payable returns (bool) {
+    function createShippingCenter(string memory _email)
+        public
+        payable
+        returns (bool)
+    {
         require(bytes(_email).length > 0, "Email is required");
         require(
             !(bytes(shippingCentersList[_email].email).length > 0),
@@ -164,9 +166,11 @@ contract SMBPOST {
         return true;
     }
 
-    function createStorehouse(
-        string memory _email
-    ) public payable returns (bool) {
+    function createStorehouse(string memory _email)
+        public
+        payable
+        returns (bool)
+    {
         require(bytes(_email).length > 0, "Email is required");
         require(
             !(bytes(storehousesList[_email].email).length > 0),
@@ -198,6 +202,7 @@ contract SMBPOST {
         newHistory.timestamp = block.timestamp;
         newHistory.date = _transferDate;
         newHistory.action = "Move to storehouse";
+        newHistory.posEmail = _storehouseEmail;
         newHistory.detail = string(
             abi.encodePacked("Storehouse:", _storehouseEmail)
         );
@@ -227,6 +232,7 @@ contract SMBPOST {
         newHistory.detail = string(
             abi.encodePacked("Customer:", _customerEmail)
         );
+        newHistory.posEmail = _customerEmail;
         order.histories.push(newHistory);
 
         return true;
@@ -265,9 +271,11 @@ contract SMBPOST {
         return (orders, orderIDs);
     }
 
-    function getOrderByStaffEmail(
-        string memory _email
-    ) public view returns (Order[] memory, string[] memory) {
+    function getOrderByStaffEmail(string memory _email)
+        public
+        view
+        returns (Order[] memory, string[] memory)
+    {
         uint256 orderCount = 0;
 
         for (uint256 i = 0; i < orderIDs.length; i++) {
@@ -295,9 +303,11 @@ contract SMBPOST {
         return (orders, ids);
     }
 
-    function getOrderByCustomerEmail(
-        string memory _email
-    ) public view returns (Order[] memory, string[] memory) {
+    function getOrderByCustomerEmail(string memory _email)
+        public
+        view
+        returns (Order[] memory, string[] memory)
+    {
         uint256 orderCount = 0;
         for (uint256 i = 0; i < orderIDs.length; i++) {
             string memory orderID = orderIDs[i];
@@ -328,9 +338,11 @@ contract SMBPOST {
         return (orders, ids);
     }
 
-    function removeShoppingCenter(
-        string memory _email
-    ) public payable returns (bool) {
+    function removeShoppingCenter(string memory _email)
+        public
+        payable
+        returns (bool)
+    {
         require(
             bytes(shippingCentersList[_email].email).length > 0,
             "Shipping center does not exist"
@@ -339,9 +351,11 @@ contract SMBPOST {
         return true;
     }
 
-    function removeStorehouse(
-        string memory _email
-    ) public payable returns (bool) {
+    function removeStorehouse(string memory _email)
+        public
+        payable
+        returns (bool)
+    {
         require(
             bytes(storehousesList[_email].email).length > 0,
             "Storehouse does not exist"
@@ -350,9 +364,11 @@ contract SMBPOST {
         return true;
     }
 
-    function removeCustomer(
-        string memory _email
-    ) public payable returns (bool) {
+    function removeCustomer(string memory _email)
+        public
+        payable
+        returns (bool)
+    {
         require(
             bytes(customersList[_email].email).length > 0,
             "Customer does not exist"
@@ -361,19 +377,21 @@ contract SMBPOST {
         return true;
     }
 
-    function compareTwoStrings(
-        string memory str1,
-        string memory str2
-    ) internal pure returns (bool) {
+    function compareTwoStrings(string memory str1, string memory str2)
+        internal
+        pure
+        returns (bool)
+    {
         return
             keccak256(abi.encodePacked(str1)) ==
             keccak256(abi.encodePacked(str2));
     }
 
-    function findOrderByWays(
-        string[] memory ways,
-        string memory _email
-    ) internal pure returns (bool) {
+    function findOrderByWays(string[] memory ways, string memory _email)
+        internal
+        pure
+        returns (bool)
+    {
         for (uint256 i = 0; i < ways.length; i++) {
             if (compareTwoStrings(ways[i], _email)) {
                 return true;

@@ -68,8 +68,7 @@ export default function CreateNewUserModal({ refetch }) {
     };
 
     try {
-      const response = await requestAPI('user/create-user', 'POST', data);
-      console.log(response);
+      await requestAPI('user/create-user', 'POST', data);
       await refetch();
       Swal.fire({
         icon: 'success',

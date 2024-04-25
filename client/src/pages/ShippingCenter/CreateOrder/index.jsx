@@ -159,6 +159,7 @@ export default function CreateOrder() {
         senderEmail: sender.value.email,
         receiverEmail: receiver.value.email,
         imageURL: imageURL,
+        note: note.current.value,
         wayEmails: locationList.map((location) => location.value.email)
       });
       Swal.fire({

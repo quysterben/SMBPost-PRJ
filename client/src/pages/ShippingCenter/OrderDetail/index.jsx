@@ -6,13 +6,25 @@ import useContractHook from '../../../hooks/useContractHook';
 
 import { getOrderById } from '../../../utils/web3func/orderFuncs';
 import convertHistoryToStatus from '../../../utils/convertHistoryToStatus';
+import { transferToStorehouse } from '../../../utils/web3func/transferFuncs';
 import requestApi from '../../../utils/fetchAPI';
 
 import QRCode from 'react-qr-code';
-import { Container, Paper, Typography, IconButton, Chip } from '@mui/material';
+import {
+  Container,
+  Paper,
+  Typography,
+  IconButton,
+  Chip,
+  Step,
+  Stepper,
+  StepLabel,
+  Button
+} from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import { grey } from '@mui/material/colors';
+import TransferButton from '../../../components/TransferButton';
 
 export default function OrderDetail() {
   const { id } = useParams();
@@ -26,16 +38,17 @@ export default function OrderDetail() {
   const [orderData, setOrderData] = useState({});
   // User Data: center, sender, receiver
   const [userDatas, setUserDatas] = useState([]); // [center, sender, receiver]
+  const [historyDatas, setHistoryDatas] = useState([]);
   const [senderData, setSenderData] = useState({});
   const [receiverData, setReceiverData] = useState({});
   const [centerData, setCenterData] = useState({});
+  const [trackerDatas, setTrackerDatas] = useState([]);
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
         const order = await getOrderById(account, contract, id);
         setOrderData(order);
-        console.log(order);
         return order;
       } catch (error) {
         console.log(error);
@@ -47,9 +60,14 @@ export default function OrderDetail() {
         const order = await fetchOrder();
         const userDatasRes = await requestApi('user', 'GET');
         setUserDatas(userDatasRes.data.users);
-        setSenderData(userDatasRes.data.users.find((user) => user.email === order[0]));
-        setReceiverData(userDatasRes.data.users.find((user) => user.email === order[1]));
-        setCenterData(userDatasRes.data.users.find((user) => user.email === order[4][0]));
+        const sender = userDatasRes.data.users.find((user) => user.email === order[0]);
+        const receiver = userDatasRes.data.users.find((user) => user.email === order[1]);
+        const center = userDatasRes.data.users.find((user) => user.email === order[4][0]);
+        setSenderData(sender);
+        setReceiverData(receiver);
+        setCenterData(center);
+        setHistoryDatas(order[5]);
+        setTrackerDatas([order[0], ...order[4], order[1]]);
         setIsLoading(false);
       } catch (err) {
         console.log(err);
@@ -58,6 +76,19 @@ export default function OrderDetail() {
 
     fetchUserDatas();
   }, [id]);
+
+  const moveToStorehouse = async () => {
+    try {
+      const storehouseEmail = trackerDatas[1 + historyDatas.length];
+      const res = await transferToStorehouse(account, contract, {
+        orderID: id,
+        storehouseEmail
+      });
+      console.log(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   if (isLoading) return <div>Loading...</div>;
   return (
@@ -79,9 +110,7 @@ export default function OrderDetail() {
             <ArrowBackIcon />
           </IconButton>
           <Typography variant="h6">Order Tracking</Typography>
-          <IconButton onClick={() => navigate(-1)}>
-            <LocalShippingOutlinedIcon />
-          </IconButton>
+          <TransferButton onClickAction={() => moveToStorehouse()} />
         </Container>
         <Container
           sx={{ px: '80px', borderTopWidth: '1px', borderStyle: 'solid', borderColor: grey[100] }}
@@ -201,6 +230,15 @@ export default function OrderDetail() {
             <Typography>{centerData.email}</Typography>
             <Typography>{centerData.address}</Typography>
           </Container>
+        </Container>
+        <Container sx={{ mt: '60px' }}>
+          <Stepper variant="progress" activeStep={historyDatas.length + 1} alternativeLabel>
+            {trackerDatas.map((label, index) => (
+              <Step key={index}>
+                <StepLabel>{userDatas.find((param) => param.email === label).username}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
         </Container>
       </Paper>
     </Container>
