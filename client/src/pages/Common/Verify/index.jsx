@@ -27,7 +27,7 @@ export default function verify() {
         }}
       >
         <Typography sx={{ mx: 'auto', fontWeight: 'bold' }} variant="h5">
-          Verify Order
+          Verify and Track Your Order
         </Typography>
         <Container
           sx={{ display: 'flex', width: 'full', justifyContent: 'space-evenly', mt: '100px' }}
@@ -36,16 +36,16 @@ export default function verify() {
             className="verify-img"
             onClick={() => navigate('by-qr-code')}
             src={QRCodeImgURL}
-            width="280"
-            height="280"
+            width="260"
+            height="260"
             alt="QR Code"
           />
           <img
             className="verify-img"
             onClick={() => navigate('by-id')}
             src={IDCodeImgURL}
-            width="280"
-            height="280"
+            width="260"
+            height="260"
             alt="ID Code"
           />
         </Container>

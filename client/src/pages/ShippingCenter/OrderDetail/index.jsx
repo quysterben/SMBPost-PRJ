@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 
@@ -18,15 +17,12 @@ import {
   Chip,
   Step,
   Stepper,
-  StepLabel,
-  Button
+  StepLabel
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import { grey } from '@mui/material/colors';
 import TransferButton from '../../../components/TransferButton';
 import UserDetailDiablog from '../../../components/UserDetailDiablog';
-import MovingTruck from '../../../components/MovingTruck';
 
 export default function OrderDetail() {
   const { id } = useParams();

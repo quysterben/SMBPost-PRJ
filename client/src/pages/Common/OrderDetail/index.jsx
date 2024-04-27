@@ -1,7 +1,10 @@
 import { Container, Paper, Typography } from '@mui/material';
-import QRCodeScanner from '../../../../components/QRCodeScanner';
+import { useParams } from 'react-router-dom';
 
-export default function VerifyByQrCode() {
+export default function VerifyOrderDetail() {
+  const { orderID } = useParams();
+  console.log(orderID);
+
   return (
     <Container>
       <Paper
@@ -19,13 +22,8 @@ export default function VerifyByQrCode() {
         }}
       >
         <Typography sx={{ mx: 'auto', fontWeight: 'bold' }} variant="h5">
-          Verify By QR Code
+          Order Tracking
         </Typography>
-        <Container
-          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}
-        >
-          <QRCodeScanner />
-        </Container>
       </Paper>
     </Container>
   );
