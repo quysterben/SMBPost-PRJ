@@ -54,7 +54,19 @@ export const getAllOrders = async (accountAdrress, contract) => {
 export const getOrdersByStaffEmail = async (accountAdrress, contract, email) => {
   try {
     const res = await contract.methods.getOrderByStaffEmail(email).call({ from: accountAdrress });
-    return res;
+    const result = res[0].map((order, index) => {
+      return {
+        orderID: res[1][index],
+        receiverEmail: order.receiverEmail,
+        senderEmail: order.senderEmail,
+        status: order.status,
+        note: order.note,
+        imageURL: order.imageURL,
+        histories: order.histories,
+        wayEmails: order.wayEmails
+      };
+    });
+    return result;
   } catch (err) {
     console.log(err);
   }
