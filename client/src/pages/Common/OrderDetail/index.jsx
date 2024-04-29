@@ -96,9 +96,10 @@ export default function VerifyOrderDetail() {
           my: '4px',
           py: '20px',
           minHeight: '680px',
+          height: '92vh',
           display: 'flex',
           flexDirection: 'column',
-          gap: '20px',
+          gap: '4vh',
           bgcolor: 'white'
         }}
       >

@@ -34,14 +34,12 @@ export default function VerifyByID() {
         if (isOrderExist) {
           Swal2.fire({
             icon: 'success',
-            title: 'Order Found',
             text: 'Your order has been found!'
           });
           navigate(`/verify/order/${otp}`);
         } else {
           Swal2.fire({
             icon: 'error',
-            title: 'Order Not Found',
             text: 'Your order is not found!'
           });
         }
@@ -59,7 +57,7 @@ export default function VerifyByID() {
         sx={{
           my: '4px',
           py: '20px',
-          maxHeight: '680px',
+          height: '92vh',
           overflow: 'auto',
           minHeight: '680px',
           display: 'flex',
@@ -71,7 +69,7 @@ export default function VerifyByID() {
         <Typography sx={{ mx: 'auto', fontWeight: 'bold' }} variant="h5">
           Verify By ID
         </Typography>
-        <Typography sx={{ mx: 'auto', mt: '40px', fontStyle: 'italic' }} variant="h8">
+        <Typography sx={{ mx: 'auto', mt: '120px', fontStyle: 'italic' }} variant="h8">
           Please enter the ID Code of your order!
         </Typography>
         <Container sx={{ display: 'flex', justifyContent: 'center', width: '60%', mt: '16px' }}>

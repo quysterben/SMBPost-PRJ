@@ -4,7 +4,7 @@ import { Html5QrcodeScanType, Html5QrcodeScanner } from 'html5-qrcode';
 import PropTypes from 'prop-types';
 QRCodeScanner.propTypes = {
   setResult: PropTypes.func.isRequired,
-  isResetScanner: PropTypes.bool.isRequired
+  isResetScanner: PropTypes.bool
 };
 
 function QRCodeScanner({ setResult, isResetScanner }) {

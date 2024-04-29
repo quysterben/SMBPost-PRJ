@@ -15,12 +15,11 @@ export default function verify() {
       <Paper
         elevation={3}
         sx={{
-          my: '4px',
           py: '20px',
-          maxHeight: '680px',
           overflow: 'auto',
-          minHeight: '680px',
           display: 'flex',
+          minHeight: '100%',
+          height: '92vh',
           flexDirection: 'column',
           gap: '20px',
           bgcolor: 'white'
@@ -30,7 +29,14 @@ export default function verify() {
           Verify and Track Your Order
         </Typography>
         <Container
-          sx={{ display: 'flex', width: 'full', justifyContent: 'space-evenly', mt: '100px' }}
+          sx={{
+            display: 'flex',
+            width: 'full',
+            justifyContent: 'space-evenly',
+            alignItems: 'center',
+            mt: '100px',
+            height: '50vh'
+          }}
         >
           <img
             className="verify-img"
