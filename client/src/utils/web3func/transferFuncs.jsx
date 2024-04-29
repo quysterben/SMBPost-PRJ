@@ -14,6 +14,20 @@ export const transferToStorehouse = async (accountAdrress, contract, data) => {
     });
 };
 
+export const transferToCustomer = async (accountAdrress, contract, data) => {
+  const timestampNow = moment().format('YYYY-MM-DD HH:mm:ss').toString();
+  const submitData = {
+    orderID: data.orderID,
+    transferDate: timestampNow,
+    customerEmail: data.customerEmail
+  };
+  return await contract.methods
+    .transferToCustomer(submitData.orderID, submitData.customerEmail, submitData.transferDate)
+    .send({
+      from: accountAdrress
+    });
+};
+
 export const cancelAnOrder = async (accountAdrress, contract, data) => {
   const timestampNow = moment().format('YYYY-MM-DD HH:mm:ss').toString();
   const submitData = {

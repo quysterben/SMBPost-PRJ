@@ -5,9 +5,10 @@ import useContractHook from '../../../hooks/useContractHook';
 
 import { getOrderById } from '../../../utils/web3func/orderFuncs';
 import convertHistoryToStatus from '../../../utils/convertHistoryToStatus';
-import { transferToStorehouse } from '../../../utils/web3func/transferFuncs';
+import { transferToCustomer, transferToStorehouse } from '../../../utils/web3func/transferFuncs';
 import requestApi from '../../../utils/fetchAPI';
 
+import Swal from 'sweetalert2';
 import QRCode from 'react-qr-code';
 import {
   Container,
@@ -17,18 +18,21 @@ import {
   Chip,
   Step,
   Stepper,
-  StepLabel
+  StepLabel,
+  Backdrop
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { grey } from '@mui/material/colors';
 import TransferButton from '../../../components/TransferButton';
 import UserDetailDiablog from '../../../components/UserDetailDiablog';
+import Loader from '../../../components/Loader';
 
 export default function StorehouseOrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingTransfer, setIsLoadingTransfer] = useState(false);
 
   const contract = useContractHook((state) => state.contract);
   const account = useContractHook((state) => state.account);
@@ -76,17 +80,36 @@ export default function StorehouseOrderDetail() {
     fetchUserDatas();
   }, [id]);
 
-  const moveToStorehouse = async () => {
+  const transferOrder = async () => {
     try {
-      const storehouseEmail = trackerDatas[1 + historyDatas.length];
-      const res = await transferToStorehouse(account, contract, {
-        orderID: id,
-        storehouseEmail
+      setIsLoadingTransfer(true);
+      if (trackerDatas[trackerDatas.length - 1] === trackerDatas[1 + historyDatas.length]) {
+        console.log('transferToCustomer');
+        await transferToCustomer(account, contract, {
+          orderID: id,
+          customerEmail: trackerDatas[trackerDatas.length - 1]
+        });
+      } else {
+        const storehouseEmail = trackerDatas[1 + historyDatas.length];
+        await transferToStorehouse(account, contract, {
+          orderID: id,
+          storehouseEmail
+        });
+      }
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Order has been transferred successfully!'
       });
-      console.log(res);
+      navigate(-1);
     } catch (err) {
-      console.log(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'User denied transaction!'
+      });
     }
+    setIsLoadingTransfer(false);
   };
 
   //   userDetailDialog
@@ -103,9 +126,29 @@ export default function StorehouseOrderDetail() {
     setOpen(false);
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading)
+    return (
+      <Container
+        sx={{
+          height: '92vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        <Loader />
+      </Container>
+    );
   return (
     <Container>
+      {isLoadingTransfer && (
+        <Backdrop
+          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: 'transparent' }}
+          open={true}
+        >
+          <Loader />
+        </Backdrop>
+      )}
       <Paper
         elevation={3}
         sx={{
@@ -115,7 +158,8 @@ export default function StorehouseOrderDetail() {
           display: 'flex',
           flexDirection: 'column',
           gap: '20px',
-          bgcolor: 'white'
+          bgcolor: 'white',
+          opacity: isLoadingTransfer ? 0.5 : 1
         }}
       >
         <Container sx={{ display: 'flex', width: 'full', justifyContent: 'space-between' }}>
@@ -124,7 +168,7 @@ export default function StorehouseOrderDetail() {
           </IconButton>
           <Typography variant="h6">Order Tracking</Typography>
           {historyDatas[historyDatas.length - 1].posEmail === currUserEmail ? (
-            <TransferButton onClickAction={() => moveToStorehouse()} />
+            <TransferButton onClickAction={() => transferOrder()} />
           ) : (
             <Chip label="Intransit" variant="outlined" color="primary" />
           )}
