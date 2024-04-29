@@ -164,7 +164,7 @@ export default function Sidebar() {
           }}
         >
           <VerifiedIcon />
-          <Typography sx={{ fontWeight: '500' }}>Verify</Typography>
+          <Typography sx={{ fontWeight: '500' }}>Tracking</Typography>
         </Container>
       </Container>
       <Container>

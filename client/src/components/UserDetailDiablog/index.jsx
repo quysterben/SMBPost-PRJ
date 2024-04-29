@@ -21,7 +21,6 @@ export default function UserDetailDiablog(props) {
 
   const handleClose = () => {
     onClose();
-    setOrderCount(0);
   };
 
   const theme = useTheme();

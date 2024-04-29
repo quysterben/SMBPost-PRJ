@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 
@@ -78,12 +79,21 @@ export default function OrderDetail() {
 
   const moveToStorehouse = async () => {
     try {
+      setIsLoading(true);
       const storehouseEmail = trackerDatas[1 + historyDatas.length];
-      const res = await transferToStorehouse(account, contract, {
+      await transferToStorehouse(account, contract, {
         orderID: id,
         storehouseEmail
       });
-      console.log(res);
+      setIsLoading(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const cancelAnOrder = async () => {
+    try {
+      console.log('cancel order');
     } catch (err) {
       console.log(err);
     }
