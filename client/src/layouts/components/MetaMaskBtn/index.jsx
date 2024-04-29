@@ -9,11 +9,11 @@ import Swal from 'sweetalert2';
 import useContractHook from '../../../hooks/useContractHook';
 
 export default function MetaMaskBtn() {
-  const [connected, setConnected] = useState(false);
-
   const contract = useContractHook((state) => state.contract);
   const account = useContractHook((state) => state.account);
   const setAccount = useContractHook((state) => state.setAccount);
+  const [connected, setConnected] = useState(contract && account !== '' && account !== undefined);
+
   useEffect(() => {
     if (contract && account !== '' && account !== undefined) {
       setConnected(true);
