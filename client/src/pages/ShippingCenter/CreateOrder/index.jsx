@@ -12,7 +12,8 @@ import {
   InputLabel,
   Typography,
   Menu,
-  Paper
+  Paper,
+  Backdrop
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -180,16 +181,14 @@ export default function CreateOrder() {
   if (loading) return <div>Loading...</div>;
   return (
     <Container>
-      <Container
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '53%',
-          zIndex: 100
-        }}
-      >
-        {submiting && <Loader />}
-      </Container>
+      {submiting && (
+        <Backdrop
+          open={submiting}
+          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: 'transparent' }}
+        >
+          <Loader />
+        </Backdrop>
+      )}
       <Paper
         elevation={3}
         sx={{

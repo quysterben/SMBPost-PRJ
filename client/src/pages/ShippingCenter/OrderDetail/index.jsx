@@ -9,6 +9,7 @@ import convertHistoryToStatus from '../../../utils/convertHistoryToStatus';
 import { transferToStorehouse } from '../../../utils/web3func/transferFuncs';
 import requestApi from '../../../utils/fetchAPI';
 
+import Swal from 'sweetalert2';
 import QRCode from 'react-qr-code';
 import {
   Container,
@@ -18,7 +19,8 @@ import {
   Chip,
   Step,
   Stepper,
-  StepLabel
+  StepLabel,
+  Backdrop
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { grey } from '@mui/material/colors';
@@ -31,6 +33,7 @@ export default function OrderDetail() {
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingTransfer, setIsLoadingTransfer] = useState(false);
 
   const contract = useContractHook((state) => state.contract);
   const account = useContractHook((state) => state.account);
@@ -79,16 +82,21 @@ export default function OrderDetail() {
 
   const moveToStorehouse = async () => {
     try {
-      setIsLoading(true);
+      setIsLoadingTransfer(true);
       const storehouseEmail = trackerDatas[1 + historyDatas.length];
       await transferToStorehouse(account, contract, {
         orderID: id,
         storehouseEmail
       });
-      setIsLoading(false);
+      navigate(-1);
     } catch (err) {
-      console.log(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'User denied transaction!'
+      });
     }
+    setIsLoadingTransfer(false);
   };
 
   const cancelAnOrder = async () => {
@@ -117,7 +125,7 @@ export default function OrderDetail() {
     return (
       <Container
         sx={{
-          height: '100vh',
+          height: '92vh',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center'
@@ -128,9 +136,18 @@ export default function OrderDetail() {
     );
   return (
     <Container>
+      {isLoadingTransfer && (
+        <Backdrop
+          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: 'transparent' }}
+          open={true}
+        >
+          <Loader />
+        </Backdrop>
+      )}
       <Paper
         elevation={3}
         sx={{
+          opacity: isLoadingTransfer ? 0.5 : 1,
           my: '4px',
           py: '20px',
           minHeight: '680px',
