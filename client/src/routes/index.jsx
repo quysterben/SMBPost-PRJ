@@ -1,5 +1,5 @@
 import NotFound from '../pages/Common/NotFound';
-import Login from '../pages/Common/Login';
+import LoginPage from '../pages/Common/Login';
 
 import DefaultLayout from '../layouts/DefaultLayout';
 
@@ -20,7 +20,7 @@ import VerifyByID from '../pages/Common/Verify/VerifyByID';
 import VerifyByQrCode from '../pages/Common/Verify/VerifyByQrCode';
 import VerifyOrderDetail from '../pages/Common/OrderDetail';
 
-const publicRoutes = [{ path: '/login', component: Login, layout: null }];
+const publicRoutes = [{ path: '/login', component: LoginPage, layout: null }];
 
 const privateRoutes = [
   //   adminRoutes

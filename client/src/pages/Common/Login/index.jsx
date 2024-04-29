@@ -1,7 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-
+import { useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import requestAPI from '../../../utils/fetchAPI';
+import Swal from 'sweetalert2';
 import {
   Container,
+  Typography,
   FormControl,
   InputLabel,
   OutlinedInput,
@@ -9,20 +12,14 @@ import {
   IconButton
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-import { blueGrey } from '@mui/material/colors';
+import { blue } from '@mui/material/colors';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { LOGO_URL, AUTH_IMG_URL } from '../../../const';
 
-import Swal from 'sweetalert2';
-
-import { useNavigate } from 'react-router-dom';
-
-import requestAPI from '../../../utils/fetchAPI';
-
-import { LOGO_URL } from '../../../const';
-
-export default function Login() {
+export default function LoginPage() {
   const navigate = useNavigate();
+
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -37,7 +34,7 @@ export default function Login() {
 
   useEffect(() => {
     if (localStorage.getItem('accessToken')) {
-      navigate('/admin/dashboard');
+      navigate('/');
     }
   }, []);
 
@@ -90,34 +87,40 @@ export default function Login() {
   };
 
   return (
-    <Container
-      sx={{
-        margin: 0,
-        bgcolor: blueGrey[50],
-        minWidth: '100vw',
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}
-    >
+    <Container sx={{ height: '100vh', display: 'flex', m: 0, p: 0 }}>
+      <Container sx={{ bgcolor: blue[50], display: 'flex', flexDirection: 'column', m: 0, p: 0 }}>
+        <Container sx={{ display: 'flex', alignItems: 'center' }}>
+          <img src={LOGO_URL} width="100" height="100" />
+          <Typography variant="h5" fontWeight="bold">
+            SMBPost
+          </Typography>
+        </Container>
+        <Container
+          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: '1' }}
+        >
+          <img src={AUTH_IMG_URL} width="600" height="600" />
+        </Container>
+      </Container>
       <Container
         sx={{
-          width: '500px',
-          height: '80%',
-          bgcolor: blueGrey[100],
-          borderRadius: '12px',
+          height: '100vh',
+          width: '40%',
           display: 'flex',
+          padding: '100px',
           flexDirection: 'column',
-          alignItems: 'center',
-          boxShadow: 3
+          justifyContent: 'center',
+          gap: '32px'
         }}
       >
-        <img src={LOGO_URL} width={240} height={240}></img>
+        <Container sx={{ p: 0 }}>
+          <Typography variant="h5" fontWeight="bold">
+            Welcome to SMBPost
+          </Typography>
+          <Typography variant="h8">Please login to the system!</Typography>
+        </Container>
         <form
           onSubmit={handleSubmitLogin}
           style={{
-            width: '80%',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -125,11 +128,11 @@ export default function Login() {
             gap: '28px'
           }}
         >
-          <FormControl sx={{ width: '80%' }}>
+          <FormControl sx={{ width: '100%' }}>
             <InputLabel htmlFor="component-outlined">Email</InputLabel>
             <OutlinedInput inputRef={emailInput} id="component-outlined" label="email" />
           </FormControl>
-          <FormControl sx={{ width: '80%' }}>
+          <FormControl sx={{ width: '100%' }}>
             <InputLabel htmlFor="component-outlined">Password</InputLabel>
             <OutlinedInput
               inputRef={passwordInput}
@@ -154,7 +157,7 @@ export default function Login() {
             loading={isLoading}
             type="submit"
             variant="contained"
-            sx={{ width: '80%' }}
+            sx={{ width: '100%', height: 'full' }}
           >
             Login
           </LoadingButton>
