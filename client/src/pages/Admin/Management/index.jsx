@@ -145,7 +145,7 @@ export default function Management() {
         </Container>
       </Container>
       <TableContainer
-        sx={{ width: '96%', mx: 'auto', mt: '12px', maxHeight: '570px' }}
+        sx={{ width: '96%', mx: 'auto', mt: '12px', maxHeight: '100%' }}
         component={Paper}
       >
         <Table stickyHeader aria-label="User management">

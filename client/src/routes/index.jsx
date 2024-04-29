@@ -13,6 +13,7 @@ import CreateOrder from '../pages/ShippingCenter/CreateOrder';
 import OrderDetail from '../pages/ShippingCenter/OrderDetail';
 
 import StorehouseOrders from '../pages/Storehouse/Orders';
+import StorehouseOrderDetail from '../pages/Storehouse/OrderDetail';
 
 import Verify from '../pages/Common/Verify';
 import VerifyByID from '../pages/Common/Verify/VerifyByID';
@@ -62,6 +63,12 @@ const privateRoutes = [
   {
     path: '/storehouse/orders',
     component: StorehouseOrders,
+    layout: DefaultLayout,
+    role: 'storehouse'
+  },
+  {
+    path: '/storehouse/orders/:id',
+    component: StorehouseOrderDetail,
     layout: DefaultLayout,
     role: 'storehouse'
   },

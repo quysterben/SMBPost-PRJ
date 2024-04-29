@@ -1,7 +1,19 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { Container, Paper, Typography } from '@mui/material';
 import QRCodeScanner from '../../../../components/QRCodeScanner';
 
 export default function VerifyByQrCode() {
+  const [id, setId] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (id) {
+      navigate(`/verify/order/${id}`);
+    }
+  }, [id]);
+
   return (
     <Container>
       <Paper
@@ -24,7 +36,7 @@ export default function VerifyByQrCode() {
         <Container
           sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}
         >
-          <QRCodeScanner />
+          <QRCodeScanner setResult={setId} />
         </Container>
       </Paper>
     </Container>

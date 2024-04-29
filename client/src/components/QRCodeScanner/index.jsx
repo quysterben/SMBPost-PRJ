@@ -26,12 +26,9 @@ function QRCodeScanner({ setResult, isResetScanner }) {
     );
 
     const onScanSuccess = (scanData) => {
-      console.log(scanData);
       try {
-        if (scanData && typeof JSON.parse(scanData) === 'object') {
-          setResult(JSON.parse(scanData));
-          scanner.clear();
-        }
+        setResult(scanData);
+        scanner.clear();
       } catch (error) {
         throw new Error('Invalid QR code.');
       }
