@@ -23,6 +23,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { grey } from '@mui/material/colors';
 import TransferButton from '../../../components/TransferButton';
 import UserDetailDiablog from '../../../components/UserDetailDiablog';
+import Loader from '../../../components/Loader';
 
 export default function OrderDetail() {
   const { id } = useParams();
@@ -102,7 +103,19 @@ export default function OrderDetail() {
     setOpen(false);
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading)
+    return (
+      <Container
+        sx={{
+          height: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        <Loader />
+      </Container>
+    );
   return (
     <Container>
       <Paper
