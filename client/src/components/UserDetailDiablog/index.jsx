@@ -38,7 +38,9 @@ export default function UserDetailDiablog(props) {
         let res = null;
         if (user.role === 'customer') {
           res = await getOrdersByCustomerEmail(account, contract, user.email);
-          setOrderCount(res[0].length);
+          setOrderCount(
+            res.requestedRes.length + res.intransitRes.length + res.deliveredRes.length
+          );
         } else {
           res = await getOrdersByStaffEmail(account, contract, user.email);
           setOrderCount(res.length);
