@@ -77,7 +77,65 @@ export const getOrdersByCustomerEmail = async (accountAdrress, contract, email) 
     const res = await contract.methods
       .getOrderByCustomerEmail(email)
       .call({ from: accountAdrress });
-    return res;
+    const requestedRes = res[0]
+      .map((order, index) => {
+        if (order.histories.length === 1) {
+          return {
+            id: res[1][index],
+            receiver: order.receiverEmail,
+            sender: order.senderEmail,
+            note: order.note,
+            status: {
+              text: 'Requested',
+              color: 'warning'
+            },
+            nowAt: order.histories[order.histories.length - 1].posEmail,
+            timestamp: order.histories[order.histories.length - 1].date
+          };
+        }
+      })
+      .filter((order) => order !== undefined);
+    const intransitRes = res[0]
+      .map((order, index) => {
+        if (order.histories.length > 1 && order.histories.length <= order.wayEmails.length) {
+          return {
+            id: res[1][index],
+            receiver: order.receiverEmail,
+            nowAt: order.histories[order.histories.length - 1].posEmail,
+            note: order.note,
+            status: {
+              text: 'Intransit',
+              color: 'info'
+            },
+            sender: order.senderEmail,
+            timestamp: order.histories[order.histories.length - 1].date
+          };
+        }
+      })
+      .filter((order) => order !== undefined);
+    const deliveredRes = res[0]
+      .map((order, index) => {
+        if (order.histories.length === order.wayEmails.length + 1) {
+          return {
+            id: res[1][index],
+            receiver: order.receiverEmail,
+            note: order.note,
+            status: {
+              text: 'Delivered',
+              color: 'success'
+            },
+            sender: order.senderEmail,
+            nowAt: order.histories[order.histories.length - 1].posEmail,
+            timestamp: order.histories[order.histories.length - 1].date
+          };
+        }
+      })
+      .filter((order) => order !== undefined);
+    return {
+      requestedRes,
+      intransitRes,
+      deliveredRes
+    };
   } catch (err) {
     console.log(err);
   }

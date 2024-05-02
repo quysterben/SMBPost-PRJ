@@ -20,7 +20,9 @@ import {
   Step,
   Stepper,
   StepLabel,
-  Backdrop
+  Backdrop,
+  Box,
+  StepContent
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { grey } from '@mui/material/colors';
@@ -165,7 +167,7 @@ export default function OrderDetail() {
           {historyDatas.length === 1 ? (
             <TransferButton onClickAction={() => moveToStorehouse()} />
           ) : (
-            <Chip label="Intransit" variant="outlined" color="primary" />
+            <Box sx={{ w: 0 }} />
           )}
         </Container>
         <Container
@@ -289,11 +291,30 @@ export default function OrderDetail() {
         </Container>
         <Container sx={{ mt: '60px' }}>
           <Stepper variant="progress" activeStep={historyDatas.length + 1} alternativeLabel>
-            {trackerDatas.map((label, index) => (
-              <Step sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(label)} key={index}>
-                <StepLabel>{userDatas.find((param) => param.email === label).username}</StepLabel>
-              </Step>
-            ))}
+            {trackerDatas.map((label, index) => {
+              let stepContent = '';
+              let stepDate = '';
+              if (index === 0) stepContent = 'Prepare for request';
+              else if (historyDatas[index - 1]) {
+                stepContent = historyDatas[index - 1].action;
+                stepDate = historyDatas[index - 1].date;
+              }
+              return (
+                <Step sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(label)} key={index}>
+                  <StepLabel>
+                    <Typography>
+                      {userDatas.find((param) => param.email === label).username}
+                    </Typography>
+                    <Typography sx={{ display: 'block' }} variant="caption" color="textSecondary">
+                      {stepContent}
+                    </Typography>
+                    <Typography variant="caption" color="textSecondary">
+                      {stepDate}
+                    </Typography>
+                  </StepLabel>
+                </Step>
+              );
+            })}
           </Stepper>
         </Container>
       </Paper>

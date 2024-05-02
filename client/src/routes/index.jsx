@@ -19,6 +19,7 @@ import Verify from '../pages/Common/Verify';
 import VerifyByID from '../pages/Common/Verify/VerifyByID';
 import VerifyByQrCode from '../pages/Common/Verify/VerifyByQrCode';
 import VerifyOrderDetail from '../pages/Common/OrderDetail';
+import CustomerOrders from '../pages/Customer/Orders';
 
 const publicRoutes = [{ path: '/login', component: LoginPage, layout: null }];
 
@@ -72,6 +73,9 @@ const privateRoutes = [
     layout: DefaultLayout,
     role: 'storehouse'
   },
+
+  //  customerRoutes
+  { path: '/customer/orders', component: CustomerOrders, layout: DefaultLayout, role: 'customer' },
 
   { path: '*', component: NotFound, layout: DefaultLayout },
   { path: '/verify', component: Verify, layout: DefaultLayout },
