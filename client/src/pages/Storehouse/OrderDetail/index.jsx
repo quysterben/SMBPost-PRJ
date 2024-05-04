@@ -19,7 +19,8 @@ import {
   Step,
   Stepper,
   StepLabel,
-  Backdrop
+  Backdrop,
+  Box
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { grey } from '@mui/material/colors';
@@ -170,7 +171,7 @@ export default function StorehouseOrderDetail() {
           {historyDatas[historyDatas.length - 1].posEmail === currUserEmail ? (
             <TransferButton onClickAction={() => transferOrder()} />
           ) : (
-            <Chip label="Intransit" variant="outlined" color="primary" />
+            <Box></Box>
           )}
         </Container>
         <Container

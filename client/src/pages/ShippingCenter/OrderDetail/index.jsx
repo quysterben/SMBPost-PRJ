@@ -152,19 +152,28 @@ export default function OrderDetail() {
           bgcolor: 'white'
         }}
       >
-        <Container sx={{ display: 'flex', width: 'full', justifyContent: 'space-between' }}>
+        <Container
+          sx={{
+            display: 'flex',
+            width: 'full',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
+        >
           <IconButton onClick={() => navigate(-1)}>
             <ArrowBackIcon />
           </IconButton>
           <Typography variant="h6">Order Tracking</Typography>
           {convertHistoryToStatus(orderData[5][orderData[5].length - 1]).text === 'Requested' ? (
-            <Box sx={{ display: 'flex', gap: '4px' }}>
+            <Box
+              sx={{ display: 'flex', gap: '4px', justifyContent: 'center', alignItems: 'center' }}
+            >
               <TransferButton onClickAction={() => moveToStorehouse()} />
               <CancelOrderModal orderID={id} />
             </Box>
           ) : convertHistoryToStatus(orderData[5][orderData[5].length - 1]).text === 'Delivered' ? (
             <Box sx={{ w: 0 }} />
-          ) : convertHistoryToStatus(orderData[5][orderData[5].length - 1]).text === 'Canceled' ? (
+          ) : convertHistoryToStatus(orderData[5][orderData[5].length - 1]).text === 'Cancelled' ? (
             <Box sx={{ w: 0 }} />
           ) : (
             <CancelOrderModal orderID={id} />
@@ -301,7 +310,7 @@ export default function OrderDetail() {
               }
               return (
                 <Step sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(label)} key={index}>
-                  <StepLabel>
+                  <StepLabel error={stepContent === 'Canceled'}>
                     <Typography>
                       {userDatas.find((param) => param.email === label).username}
                     </Typography>

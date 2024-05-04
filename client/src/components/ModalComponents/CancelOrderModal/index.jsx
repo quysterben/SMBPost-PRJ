@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import * as React from 'react';
 import moment from 'moment';
@@ -17,6 +16,7 @@ import {
   Typography,
   Modal
 } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 import DoDisturbAltIcon from '@mui/icons-material/DoDisturbAlt';
 import Swal from 'sweetalert2';
 const style = {
@@ -33,7 +33,11 @@ const style = {
 
 import PropTypes from 'prop-types';
 
+import { useNavigate } from 'react-router-dom';
+
 export default function CancelOrderModal({ orderID }) {
+  const navigate = useNavigate();
+
   const contract = useContractHook((state) => state.contract);
   const address = useContractHook((state) => state.account);
 
@@ -47,9 +51,12 @@ export default function CancelOrderModal({ orderID }) {
   const formRef = React.useRef(null);
   const note = React.useRef(null);
 
+  const [isLoading, setIsLoading] = React.useState(false);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
+      setIsLoading(true);
       const cancelReason = note.current.value;
       await cancelAnOrder(address, contract, { orderID, cancelReason });
       Swal.fire({
@@ -58,6 +65,8 @@ export default function CancelOrderModal({ orderID }) {
         text: 'Order has been canceled!',
         target: formRef.current
       });
+      setIsLoading(false);
+      navigate('/center/orders');
     } catch (error) {
       Swal.fire({
         icon: 'error',
@@ -111,9 +120,15 @@ export default function CancelOrderModal({ orderID }) {
               <Input id="component-outlined" inputRef={note} multiline />
             </FormControl>
             <Container sx={{ display: 'flex', px: '0', gap: '8px', mt: '10px' }}>
-              <Button type="submit" variant="contained" color="error" fullWidth>
+              <LoadingButton
+                loading={isLoading}
+                type="submit"
+                variant="contained"
+                color="error"
+                fullWidth
+              >
                 Cancel
-              </Button>
+              </LoadingButton>
               <Button onClick={handleClose} variant="outlined" fullWidth>
                 Close
               </Button>

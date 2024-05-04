@@ -16,7 +16,8 @@ import {
   Chip,
   Step,
   Stepper,
-  StepLabel
+  StepLabel,
+  Box
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { grey } from '@mui/material/colors';
@@ -121,11 +122,7 @@ export default function VerifyOrderDetail() {
             <ArrowBackIcon />
           </IconButton>
           <Typography variant="h6">Order Tracking</Typography>
-          <Chip
-            variant="outlined"
-            label={convertHistoryToStatus(orderData[5][orderData[5].length - 1]).text}
-            color={convertHistoryToStatus(orderData[5][orderData[5].length - 1]).color}
-          />
+          <Box></Box>
         </Container>
         <Container
           sx={{ px: '80px', borderTopWidth: '1px', borderStyle: 'solid', borderColor: grey[100] }}
@@ -248,11 +245,30 @@ export default function VerifyOrderDetail() {
         </Container>
         <Container sx={{ mt: '60px' }}>
           <Stepper variant="progress" activeStep={historyDatas.length + 1} alternativeLabel>
-            {trackerDatas.map((label, index) => (
-              <Step sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(label)} key={index}>
-                <StepLabel>{userDatas.find((param) => param.email === label).username}</StepLabel>
-              </Step>
-            ))}
+            {trackerDatas.map((label, index) => {
+              let stepContent = '';
+              let stepDate = '';
+              if (index === 0) stepContent = 'Prepare for request';
+              else if (historyDatas[index - 1]) {
+                stepContent = historyDatas[index - 1].action;
+                stepDate = historyDatas[index - 1].date;
+              }
+              return (
+                <Step sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(label)} key={index}>
+                  <StepLabel error={stepContent === 'Canceled'}>
+                    <Typography>
+                      {userDatas.find((param) => param.email === label).username}
+                    </Typography>
+                    <Typography sx={{ display: 'block' }} variant="caption" color="textSecondary">
+                      {stepContent}
+                    </Typography>
+                    <Typography variant="caption" color="textSecondary">
+                      {stepDate}
+                    </Typography>
+                  </StepLabel>
+                </Step>
+              );
+            })}
           </Stepper>
         </Container>
       </Paper>

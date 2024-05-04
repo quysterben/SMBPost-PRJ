@@ -74,6 +74,9 @@ export const getOrdersByStaffEmail = async (accountAdrress, contract, email) => 
       .filter((order) => order !== undefined);
     const intransitRes = res[0]
       .map((order, index) => {
+        if (order.histories[order.histories.length - 1].action === 'Canceled') {
+          return undefined;
+        }
         if (order.histories.length > 1 && order.histories.length <= order.wayEmails.length) {
           return {
             id: res[1][index],
@@ -92,6 +95,9 @@ export const getOrdersByStaffEmail = async (accountAdrress, contract, email) => 
       .filter((order) => order !== undefined);
     const deliveredRes = res[0]
       .map((order, index) => {
+        if (order.histories[order.histories.length - 1].action === 'Canceled') {
+          return undefined;
+        }
         if (order.histories.length === order.wayEmails.length + 1) {
           return {
             id: res[1][index],
@@ -108,10 +114,29 @@ export const getOrdersByStaffEmail = async (accountAdrress, contract, email) => 
         }
       })
       .filter((order) => order !== undefined);
+    const canceledRes = res[0]
+      .map((order, index) => {
+        if (order.histories[order.histories.length - 1].action === 'Canceled') {
+          return {
+            id: res[1][index],
+            receiver: order.receiverEmail,
+            note: order.note,
+            status: {
+              text: 'Cancelled',
+              color: 'default'
+            },
+            sender: order.senderEmail,
+            nowAt: order.histories[order.histories.length - 1].posEmail,
+            timestamp: order.histories[order.histories.length - 1].date
+          };
+        }
+      })
+      .filter((order) => order !== undefined);
     return {
       requestedRes,
       intransitRes,
-      deliveredRes
+      deliveredRes,
+      canceledRes
     };
   } catch (err) {
     console.log(err);

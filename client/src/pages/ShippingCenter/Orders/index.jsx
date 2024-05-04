@@ -55,6 +55,7 @@ export default function CenterOrders() {
       headerName: 'Now At',
       width: 160,
       valueGetter: (params) => {
+        if (params === '') return '';
         return users.find((user) => user.email === params).username;
       }
     },
@@ -126,7 +127,7 @@ export default function CenterOrders() {
         const res = await getOrdersByStaffEmail(account, contract, currUserEmail);
         setOrders(
           generateTableDataFilterStatus(
-            [...res.requestedRes, ...res.deliveredRes, ...res.intransitRes],
+            [...res.requestedRes, ...res.deliveredRes, ...res.intransitRes, ...res.canceledRes],
             optionStatus
           )
         );

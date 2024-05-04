@@ -4,7 +4,7 @@ const convertHistoryToStatus = (history) => {
   } else if (history.action === 'Move to storehouse') {
     return { text: 'Intransit', color: 'info' };
   } else if (history.action === 'Canceled') {
-    return { text: 'Canceled', color: 'default' };
+    return { text: 'Cancelled', color: 'default' };
   } else {
     return { text: 'Delivered', color: 'success' };
   }
