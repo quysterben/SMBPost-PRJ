@@ -100,7 +100,10 @@ export default function CenterOrders() {
       >
         <AnimationButton navigateLink={'create'} />
       </Container>
-      <TableContainer sx={{ width: '96%', mx: 'auto', mt: '12px' }} component={Paper}>
+      <TableContainer
+        sx={{ width: '96%', mx: 'auto', mt: '12px', maxHeight: '80%' }}
+        component={Paper}
+      >
         <Table aria-label="User management">
           <TableHead>
             <TableRow>

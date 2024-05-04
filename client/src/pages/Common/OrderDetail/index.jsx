@@ -21,6 +21,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { grey } from '@mui/material/colors';
 import UserDetailDiablog from '../../../components/UserDetailDiablog';
+import Loader from '../../../components/Loader';
 
 export default function VerifyOrderDetail() {
   const { id } = useParams();
@@ -87,7 +88,19 @@ export default function VerifyOrderDetail() {
     setOpen(false);
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading)
+    return (
+      <Container
+        sx={{
+          height: '92vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        <Loader />
+      </Container>
+    );
   return (
     <Container>
       <Paper

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import useContractHook from '../../../hooks/useContractHook';
@@ -26,38 +27,36 @@ export default function CustomerOrders() {
   const account = useContractHook((state) => state.account);
   const contract = useContractHook((state) => state.contract);
 
-  const [orders, setOrders] = useState([]);
+  const [users, setUsers] = useState([]);
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const userRes = await requestApi('user', 'GET');
-        console.log(userRes.data.users);
-        const res = await getOrdersByCustomerEmail(account, contract, currUserEmail);
-        setOrders(res.requestedRes);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchOrder();
-  }, []);
+  const [isLoading, setIsLoading] = useState(true);
+  const [orders, setOrders] = useState([]);
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 120 },
     {
       field: 'sender',
       headerName: 'Sender',
-      width: 160
+      width: 160,
+      valueGetter: (params) => {
+        return users.find((user) => user.email === params).username;
+      }
     },
     {
       field: 'receiver',
       headerName: 'Receiver',
-      width: 160
+      width: 160,
+      valueGetter: (params) => {
+        return users.find((user) => user.email === params).username;
+      }
     },
     {
       field: 'nowAt',
       headerName: 'Now At',
-      width: 160
+      width: 160,
+      valueGetter: (params) => {
+        return users.find((user) => user.email === params).username;
+      }
     },
     {
       field: 'note',
@@ -102,6 +101,15 @@ export default function CustomerOrders() {
       setOptionRole(newOptionRole);
     }
   };
+  const generateTableDataFilterRole = (data = [], optionFilter = 'all') => {
+    if (optionFilter === 'sender') {
+      return data.filter((item) => item.sender === currUserEmail);
+    }
+    if (optionFilter === 'receiver') {
+      return data.filter((item) => item.receiver === currUserEmail);
+    }
+    return data;
+  };
 
   //   Option: Status
   const [optionStatus, setOptionStatus] = useState('all');
@@ -110,6 +118,45 @@ export default function CustomerOrders() {
       setOptionStatus(newOptionStatus);
     }
   };
+  const generateTableDataFilterStatus = (data = [], optionFilter = 'all') => {
+    if (optionFilter === 'requested') {
+      return data.filter((item) => item.status.text === 'Requested');
+    }
+    if (optionFilter === 'intransit') {
+      return data.filter((item) => item.status.text === 'Intransit');
+    }
+    if (optionFilter === 'delivered') {
+      return data.filter((item) => item.status.text === 'Delivered');
+    }
+    if (optionFilter === 'cancelled') {
+      return data.filter((item) => item.status.text === 'Cancelled');
+    }
+    return data;
+  };
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        setIsLoading(true);
+        const userRes = await requestApi('user', 'GET');
+        setUsers(userRes.data.users);
+        const res = await getOrdersByCustomerEmail(account, contract, currUserEmail);
+        setOrders(
+          generateTableDataFilterRole(
+            generateTableDataFilterStatus(
+              [...res.requestedRes, ...res.deliveredRes, ...res.intransitRes],
+              optionStatus
+            ),
+            optionRole
+          )
+        );
+        setIsLoading(false);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchOrder();
+  }, [optionRole, optionStatus]);
 
   return (
     <Container>
@@ -171,10 +218,10 @@ export default function CustomerOrders() {
             slots={{
               loadingOverlay: LinearProgress
             }}
-            loading={orders.length === 0}
-            rows={orders}
+            loading={isLoading}
             sx={{ height: '72vh' }}
             columns={columns}
+            rows={orders}
             initialState={{
               pagination: {
                 paginationModel: {
