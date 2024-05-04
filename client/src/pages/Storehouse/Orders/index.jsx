@@ -1,160 +1,206 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { useEffect, useState } from 'react';
 import useContractHook from '../../../hooks/useContractHook';
 
-import {
-  Container,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Paper,
-  Button,
-  Tooltip,
-  Chip
-} from '@mui/material';
-import { grey } from '@mui/material/colors';
-
-import Loader from '../../../components/Loader';
-import UserDetailDiablog from '../../../components/UserDetailDiablog';
-
-import requestAPI from '../../../utils/fetchAPI';
-
+import requestApi from '../../../utils/fetchAPI';
 import { getOrdersByStaffEmail } from '../../../utils/web3func/orderFuncs';
-import convertHistoryToStatus from '../../../utils/convertHistoryToStatus';
+
+import {
+  Paper,
+  Container,
+  Typography,
+  LinearProgress,
+  Chip,
+  IconButton,
+  ToggleButton,
+  ToggleButtonGroup
+} from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { blue } from '@mui/material/colors';
+import { DataGrid } from '@mui/x-data-grid';
 
 export default function StorehouseOrders() {
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
-
-  const userEmail = localStorage.getItem('userEmail');
-  const contract = useContractHook((state) => state.contract);
+  const currUserEmail = localStorage.getItem('userEmail');
   const account = useContractHook((state) => state.account);
+  const contract = useContractHook((state) => state.contract);
 
-  const [orderDatas, setOrderDatas] = useState([]);
+  const [users, setUsers] = useState([]);
 
-  //   DiablogHandle
-  const [open, setOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+  const [orders, setOrders] = useState([]);
 
-  const handleClickOpen = (user) => {
-    setSelectedUser(user);
-    setOpen(true);
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 120 },
+    {
+      field: 'sender',
+      headerName: 'Sender',
+      width: 160,
+      valueGetter: (params) => {
+        return users.find((user) => user.email === params).username;
+      }
+    },
+    {
+      field: 'receiver',
+      headerName: 'Receiver',
+      width: 160,
+      valueGetter: (params) => {
+        return users.find((user) => user.email === params).username;
+      }
+    },
+    {
+      field: 'nowAt',
+      headerName: 'Now At',
+      width: 160,
+      valueGetter: (params) => {
+        return users.find((user) => user.email === params).username;
+      }
+    },
+    {
+      field: 'note',
+      headerName: 'Note',
+      width: 200
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 120,
+      renderCell: (params) => {
+        return <Chip variant="filled" label={params.value.text} color={params.value.color} />;
+      }
+    },
+    {
+      field: 'timestamp',
+      headerName: 'Updated At',
+      type: 'string',
+      width: 180
+    },
+    {
+      headerName: 'Actions',
+      width: 100,
+      renderCell: (params) => {
+        return (
+          <IconButton
+            onClick={() => navigate(`${params.row.id}`)}
+            variant="contained"
+            color="primary"
+          >
+            <VisibilityIcon sx={{ ':hover': { color: blue[400] } }} />
+          </IconButton>
+        );
+      }
+    }
+  ];
+
+  //   Option: Status
+  const [optionStatus, setOptionStatus] = useState('all');
+  const handleChangeOptionStatus = (event, newOptionStatus) => {
+    if (newOptionStatus !== null) {
+      setOptionStatus(newOptionStatus);
+    }
   };
-
-  const handleClose = () => {
-    setOpen(false);
+  const generateTableDataFilterStatus = (data = [], optionFilter = 'all') => {
+    if (optionFilter === 'requested') {
+      return data.filter((item) => item.status.text === 'Requested');
+    }
+    if (optionFilter === 'intransit') {
+      return data.filter((item) => item.status.text === 'Intransit');
+    }
+    if (optionFilter === 'delivered') {
+      return data.filter((item) => item.status.text === 'Delivered');
+    }
+    if (optionFilter === 'cancelled') {
+      return data.filter((item) => item.status.text === 'Cancelled');
+    }
+    return data;
   };
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      const orders = await getOrdersByStaffEmail(account, contract, userEmail);
-      const userDatasRes = await requestAPI('user', 'GET');
-      const userDatas = userDatasRes.data.users;
-      setOrderDatas(
-        orders.map((param) => {
-          const nowAtEmail = param.histories[param.histories.length - 1].posEmail;
-          console.log(param);
-          return {
-            orderID: param.orderID,
-            sender: userDatas.find((user) => user.email === param.senderEmail),
-            receiver: userDatas.find((user) => user.email === param.receiverEmail),
-            status: convertHistoryToStatus(param.histories[param.histories.length - 1]).text,
-            statusColor: convertHistoryToStatus(param.histories[param.histories.length - 1]).color,
-            note: param.note,
-            nowAt: userDatas.find((user) => user.email === nowAtEmail)
-          };
-        })
-      );
-      setLoading(false);
+    const fetchOrder = async () => {
+      try {
+        setIsLoading(true);
+        const userRes = await requestApi('user', 'GET');
+        setUsers(userRes.data.users);
+        const res = await getOrdersByStaffEmail(account, contract, currUserEmail);
+        setOrders(
+          generateTableDataFilterStatus(
+            [...res.requestedRes, ...res.deliveredRes, ...res.intransitRes],
+            optionStatus
+          )
+        );
+        console.log(res);
+        setIsLoading(false);
+      } catch (err) {
+        console.log(err);
+      }
     };
-
-    if (!contract || !account) return;
-    fetchOrders().then(() => console.log('Fetch orders done'));
-
-    return () => {
-      setOrderDatas([]);
-    };
-  }, [contract, account]);
-
-  if (loading)
-    return (
-      <Container sx={{ position: 'fixed', top: '50%', left: '50%' }}>
-        <Loader />
-      </Container>
-    );
+    fetchOrder();
+  }, [optionStatus]);
 
   return (
-    <Container sx={{ bgcolor: grey[100], flex: 1, height: '100vh', margin: 0, padding: 0 }}>
-      <TableContainer sx={{ width: '96%', mx: 'auto', mt: '12px' }} component={Paper}>
-        <Table aria-label="User management">
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Sender</TableCell>
-              <TableCell>Receiver</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Now At</TableCell>
-              <TableCell>Note</TableCell>
-              <TableCell>Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {orderDatas.map((order, index) => (
-              <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <Tooltip
-                  title={order.orderID}
-                  placement="bottom"
-                  slotProps={{
-                    popper: {
-                      modifiers: [
-                        {
-                          name: 'offset',
-                          options: {
-                            offset: [24, -32]
-                          }
-                        }
-                      ]
-                    }
-                  }}
-                >
-                  <TableCell>{order.orderID.slice(0, 12)}</TableCell>
-                </Tooltip>
-                <TableCell sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(order.sender)}>
-                  {order.sender.username}
-                </TableCell>
-                <TableCell
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => handleClickOpen(order.receiver)}
-                >
-                  {order.receiver.username}
-                </TableCell>
-                <TableCell>
-                  <Chip variant="filled" label={order.status} color={order.statusColor} />
-                </TableCell>
-                <TableCell sx={{ cursor: 'pointer' }} onClick={() => handleClickOpen(order.nowAt)}>
-                  {order.nowAt.username}
-                </TableCell>
-                <TableCell>{order.note}</TableCell>
-                <TableCell>
-                  <Button
-                    onClick={() => navigate(`${order.orderID}`)}
-                    variant="contained"
-                    color="primary"
-                  >
-                    Detail
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <UserDetailDiablog open={open} onClose={handleClose} user={selectedUser} />
+    <Container>
+      <Paper
+        elevation={3}
+        sx={{
+          my: '4px',
+          py: '20px',
+          minHeight: '92vh',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0px',
+          bgcolor: 'white'
+        }}
+      >
+        <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Typography variant="h6" fontWeight="bold">
+            Orders Management
+          </Typography>
+        </Container>
+        <Container
+          sx={{
+            display: 'flex',
+            width: '100%',
+            py: '4px',
+            gap: '8px',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            my: 'auto'
+          }}
+        >
+          <ToggleButtonGroup
+            onChange={handleChangeOptionStatus}
+            value={optionStatus}
+            size="small"
+            exclusive
+          >
+            <ToggleButton value="all">{`All`}</ToggleButton>
+            <ToggleButton value="requested">{`Requested`}</ToggleButton>
+            <ToggleButton value="intransit">{`In Transit`}</ToggleButton>
+            <ToggleButton value="delivered">{`Delivered`}</ToggleButton>
+            <ToggleButton value="cancelled">{`Cancelled`}</ToggleButton>
+          </ToggleButtonGroup>
+        </Container>
+        <Container sx={{ display: 'flex' }}>
+          <DataGrid
+            slots={{
+              loadingOverlay: LinearProgress
+            }}
+            loading={isLoading}
+            sx={{ height: '72vh' }}
+            columns={columns}
+            rows={orders}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 8
+                }
+              }
+            }}
+            pageSizeOptions={[8]}
+          />
+        </Container>
+      </Paper>
     </Container>
   );
 }

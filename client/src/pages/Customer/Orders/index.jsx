@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import useContractHook from '../../../hooks/useContractHook';

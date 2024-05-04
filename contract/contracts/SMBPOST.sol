@@ -246,11 +246,15 @@ contract SMBPOST {
         require(orderExists(_orderID), "Order must be exist");
         require(bytes(_canceledDate).length > 0, "Canceled date is required");
 
+        Order storage order = ordersList[_orderID];
+
         HistoryOrder memory newHistory;
         newHistory.timestamp = block.timestamp;
         newHistory.date = _canceledDate;
         newHistory.action = "Canceled";
         newHistory.detail = string(abi.encodePacked("Canceled:", _reason));
+        
+        order.histories.push(newHistory);
 
         return true;
     }

@@ -54,19 +54,65 @@ export const getAllOrders = async (accountAdrress, contract) => {
 export const getOrdersByStaffEmail = async (accountAdrress, contract, email) => {
   try {
     const res = await contract.methods.getOrderByStaffEmail(email).call({ from: accountAdrress });
-    const result = res[0].map((order, index) => {
-      return {
-        orderID: res[1][index],
-        receiverEmail: order.receiverEmail,
-        senderEmail: order.senderEmail,
-        status: order.status,
-        note: order.note,
-        imageURL: order.imageURL,
-        histories: order.histories,
-        wayEmails: order.wayEmails
-      };
-    });
-    return result;
+    const requestedRes = res[0]
+      .map((order, index) => {
+        if (order.histories.length === 1) {
+          return {
+            id: res[1][index],
+            receiver: order.receiverEmail,
+            sender: order.senderEmail,
+            note: order.note,
+            status: {
+              text: 'Requested',
+              color: 'warning'
+            },
+            nowAt: order.histories[order.histories.length - 1].posEmail,
+            timestamp: order.histories[order.histories.length - 1].date
+          };
+        }
+      })
+      .filter((order) => order !== undefined);
+    const intransitRes = res[0]
+      .map((order, index) => {
+        if (order.histories.length > 1 && order.histories.length <= order.wayEmails.length) {
+          return {
+            id: res[1][index],
+            receiver: order.receiverEmail,
+            nowAt: order.histories[order.histories.length - 1].posEmail,
+            note: order.note,
+            status: {
+              text: 'Intransit',
+              color: 'info'
+            },
+            sender: order.senderEmail,
+            timestamp: order.histories[order.histories.length - 1].date
+          };
+        }
+      })
+      .filter((order) => order !== undefined);
+    const deliveredRes = res[0]
+      .map((order, index) => {
+        if (order.histories.length === order.wayEmails.length + 1) {
+          return {
+            id: res[1][index],
+            receiver: order.receiverEmail,
+            note: order.note,
+            status: {
+              text: 'Delivered',
+              color: 'success'
+            },
+            sender: order.senderEmail,
+            nowAt: order.histories[order.histories.length - 1].posEmail,
+            timestamp: order.histories[order.histories.length - 1].date
+          };
+        }
+      })
+      .filter((order) => order !== undefined);
+    return {
+      requestedRes,
+      intransitRes,
+      deliveredRes
+    };
   } catch (err) {
     console.log(err);
   }
@@ -153,6 +199,7 @@ export const checkIsOrderExist = async (accountAdrress, contract, orderID) => {
 export const getOrderById = async (accountAdrress, contract, orderID) => {
   try {
     const res = await contract.methods.getOrderDetail(orderID).call({ from: accountAdrress });
+    console.log(res);
     return res;
   } catch (err) {
     console.log(err);

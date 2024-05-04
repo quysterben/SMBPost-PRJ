@@ -22,12 +22,14 @@ import {
   StepLabel,
   Backdrop,
   Box,
-  StepContent
+  Button
 } from '@mui/material';
+import DoDisturbAltIcon from '@mui/icons-material/DoDisturbAlt';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { grey } from '@mui/material/colors';
 import TransferButton from '../../../components/TransferButton';
 import UserDetailDiablog from '../../../components/UserDetailDiablog';
+import CancelOrderModal from '../../../components/ModalComponents/CancelOrderModal';
 import Loader from '../../../components/Loader';
 
 export default function OrderDetail() {
@@ -41,8 +43,7 @@ export default function OrderDetail() {
   const account = useContractHook((state) => state.account);
 
   const [orderData, setOrderData] = useState({});
-  // User Data: center, sender, receiver
-  const [userDatas, setUserDatas] = useState([]); // [center, sender, receiver]
+  const [userDatas, setUserDatas] = useState([]);
   const [historyDatas, setHistoryDatas] = useState([]);
   const [senderData, setSenderData] = useState({});
   const [receiverData, setReceiverData] = useState({});
@@ -101,14 +102,6 @@ export default function OrderDetail() {
     setIsLoadingTransfer(false);
   };
 
-  const cancelAnOrder = async () => {
-    try {
-      console.log('cancel order');
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   //   userDetailDialog
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState();
@@ -164,10 +157,17 @@ export default function OrderDetail() {
             <ArrowBackIcon />
           </IconButton>
           <Typography variant="h6">Order Tracking</Typography>
-          {historyDatas.length === 1 ? (
-            <TransferButton onClickAction={() => moveToStorehouse()} />
-          ) : (
+          {convertHistoryToStatus(orderData[5][orderData[5].length - 1]).text === 'Requested' ? (
+            <Box sx={{ display: 'flex', gap: '4px' }}>
+              <TransferButton onClickAction={() => moveToStorehouse()} />
+              <CancelOrderModal orderID={id} />
+            </Box>
+          ) : convertHistoryToStatus(orderData[5][orderData[5].length - 1]).text === 'Delivered' ? (
             <Box sx={{ w: 0 }} />
+          ) : convertHistoryToStatus(orderData[5][orderData[5].length - 1]).text === 'Canceled' ? (
+            <Box sx={{ w: 0 }} />
+          ) : (
+            <CancelOrderModal orderID={id} />
           )}
         </Container>
         <Container
