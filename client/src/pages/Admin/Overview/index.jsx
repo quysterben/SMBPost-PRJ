@@ -190,7 +190,7 @@ export default function Overview() {
                         {row.name}
                       </TableCell>
                       <TableCell align="right">{row.address}</TableCell>
-                      <TableCell align="right">{row.success}%</TableCell>
+                      <TableCell align="right">{Math.round(row.success)}%</TableCell>
                       <TableCell align="right">{row.total}</TableCell>
                     </TableRow>
                   ))}
@@ -222,7 +222,7 @@ export default function Overview() {
                         {row.name}
                       </TableCell>
                       <TableCell align="right">{row.address}</TableCell>
-                      <TableCell align="right">{row.success}%</TableCell>
+                      <TableCell align="right">{Math.round(row.success)}%</TableCell>
                       <TableCell align="right">{row.total}</TableCell>
                     </TableRow>
                   ))}

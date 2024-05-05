@@ -23,3 +23,6 @@ export const doneOrderIcon =
 
 export const todayRequest =
   'https://res.cloudinary.com/dbinjkjko/image/upload/v1714867575/res/assets/nuenzo7bryyw8anmhkmz.png';
+
+export const intransitIcon =
+  'https://res.cloudinary.com/dbinjkjko/image/upload/v1714905925/res/assets/ueuwhh7cougrv7rwf9xf.png';
