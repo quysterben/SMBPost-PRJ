@@ -6,6 +6,7 @@ import DefaultLayout from '../layouts/DefaultLayout';
 import Management from '../pages/Admin/Management';
 import UserDetail from '../pages/Admin/UserDetail';
 import Overview from '../pages/Admin/Overview';
+import AdminOrders from '../pages/Admin/Orders';
 
 import CenterOverview from '../pages/ShippingCenter/Overview';
 import CenterOrders from '../pages/ShippingCenter/Orders';
@@ -33,6 +34,7 @@ const privateRoutes = [
     role: 'admin'
   },
   { path: '/admin/overview', component: Overview, layout: DefaultLayout, role: 'admin' },
+  { path: '/admin/orders', component: AdminOrders, layout: DefaultLayout, role: 'admin' },
 
   //   centerRoutes
   {

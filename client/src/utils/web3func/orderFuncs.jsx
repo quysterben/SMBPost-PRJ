@@ -41,6 +41,7 @@ export const getAllOrders = async (accountAdrress, contract) => {
             receiver: order.receiverEmail,
             sender: order.senderEmail,
             note: order.note,
+            center: order.wayEmails[0],
             status: {
               text: 'Requested',
               color: 'warning'
@@ -60,6 +61,7 @@ export const getAllOrders = async (accountAdrress, contract) => {
           return {
             id: res[1][index],
             receiver: order.receiverEmail,
+            center: order.wayEmails[0],
             nowAt: order.histories[order.histories.length - 1].posEmail,
             note: order.note,
             status: {
@@ -80,6 +82,7 @@ export const getAllOrders = async (accountAdrress, contract) => {
         if (order.histories.length === order.wayEmails.length + 1) {
           return {
             id: res[1][index],
+            center: order.wayEmails[0],
             receiver: order.receiverEmail,
             note: order.note,
             status: {
@@ -98,6 +101,7 @@ export const getAllOrders = async (accountAdrress, contract) => {
         if (order.histories[order.histories.length - 1].action === 'Canceled') {
           return {
             id: res[1][index],
+            center: order.wayEmails[0],
             receiver: order.receiverEmail,
             note: order.note,
             status: {
