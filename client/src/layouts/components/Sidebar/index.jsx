@@ -124,32 +124,35 @@ export default function Sidebar() {
             <Typography sx={{ fontWeight: '500' }}>Management</Typography>
           </Container>
         )}
-        <Container
-          onClick={() =>
-            navigate(
-              currUserRole === 'admin'
-                ? '/admin/orders'
-                : currUserRole === 'shippingCenter'
-                  ? '/center/orders'
-                  : currUserRole == 'storehouse'
-                    ? '/storehouse/orders'
-                    : '/customer/orders'
-            )
-          }
-          sx={{
-            width: '100%',
-            color: grey[600],
-            display: 'flex',
-            borderRadius: '8px',
-            gap: '10px',
-            padding: '10px 20px',
-            cursor: 'pointer',
-            ':hover': { color: blue[600], bgcolor: grey[200] }
-          }}
-        >
-          <InventoryIcon />
-          <Typography sx={{ fontWeight: '500' }}>Orders</Typography>
-        </Container>
+        {currUserRole !== 'admin' && (
+          <Container
+            onClick={() =>
+              navigate(
+                currUserRole === 'admin'
+                  ? '/admin/orders'
+                  : currUserRole === 'shippingCenter'
+                    ? '/center/orders'
+                    : currUserRole == 'storehouse'
+                      ? '/storehouse/orders'
+                      : '/customer/orders'
+              )
+            }
+            sx={{
+              width: '100%',
+              color: grey[600],
+              display: 'flex',
+              borderRadius: '8px',
+              gap: '10px',
+              padding: '10px 20px',
+              cursor: 'pointer',
+              ':hover': { color: blue[600], bgcolor: grey[200] }
+            }}
+          >
+            <InventoryIcon />
+            <Typography sx={{ fontWeight: '500' }}>Orders</Typography>
+          </Container>
+        )}
+
         <Container
           onClick={() => navigate('/verify')}
           sx={{
