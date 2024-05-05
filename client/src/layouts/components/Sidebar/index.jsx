@@ -78,7 +78,7 @@ export default function Sidebar() {
       </Container>
       <MetaMaskBtn />
       <Container sx={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
-        {currUserRole != 'customer' && (
+        {currUserRole != 'customer' && currUserRole != 'storehouse' && (
           <Container
             onClick={() =>
               navigate(

@@ -5,7 +5,8 @@ import useContractHook from '../../../hooks/useContractHook';
 import moment from 'moment';
 import {
   getOrdersByStaffEmail,
-  getOrdersByCustomerEmail
+  getOrdersByCustomerEmail,
+  getAllOrdersIn5DaysByEmail
 } from '../../../utils/web3func/orderFuncs';
 import requestApi from '../../../utils/fetchAPI';
 
@@ -20,7 +21,7 @@ import {
   TableRow,
   TableCell
 } from '@mui/material';
-import { PieChart } from '@mui/x-charts';
+import { PieChart, SparkLineChart } from '@mui/x-charts';
 import { blue } from '@mui/material/colors';
 import TotalCount from './components/TotalCount';
 import Loader from '../../../components/Loader';
@@ -32,6 +33,8 @@ export default function CenterOverview() {
 
   const [loading, setLoading] = useState(true);
 
+  const [users, setUsers] = useState([]); // [users]
+
   //   Total
   const [customers, setCustomers] = useState(0);
   const [orders, setOrders] = useState(0);
@@ -40,15 +43,20 @@ export default function CenterOverview() {
   const [todayOrders, setTodayOrders] = useState(0);
   const [intransitOrders, setIntransitOrders] = useState(0);
 
+  const [todayData, setTodayData] = useState([]);
+
   const [requestedOrders, setRequestedOrders] = useState([]);
   const [canceledOrders, setCanceledOrders] = useState([]);
 
   const [bestCustomers, setBestCustomers] = useState([]);
 
+  const [orderIn5Days, setOrderIn5Days] = useState();
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const res = await requestApi('user', 'GET');
+        setUsers(res.data.users);
         for await (const param of res.data.users) {
           if (param.role === 'storehouse' && param.isActive) {
             setStorehouses((prev) => prev + 1);
@@ -98,9 +106,15 @@ export default function CenterOverview() {
         res.requestedRes.forEach((param) => {
           if (param.status.text === 'Requested') {
             const isToday = moment(param.timestamp).isSame(new Date(), 'day');
-            if (isToday) setTodayOrders((prev) => prev + 1);
+            if (isToday) {
+              setTodayOrders((prev) => prev + 1);
+              setTodayData((prev) => [...prev, param]);
+            }
           }
         });
+
+        const orderIn5Days = await getAllOrdersIn5DaysByEmail(account, contract, currUserEmail);
+        setOrderIn5Days(orderIn5Days);
       } catch (err) {
         console.error(err);
       }
@@ -122,6 +136,7 @@ export default function CenterOverview() {
         <Loader />
       </Container>
     );
+  else console.log(todayData);
 
   return (
     <Container>
@@ -134,40 +149,82 @@ export default function CenterOverview() {
         customers={customers}
       />
       <Container sx={{ my: 5, display: 'flex', gap: '32px' }}>
-        <Paper sx={{ p: '8px', flex: '1' }}>
-          <Typography variant="h6" sx={{ color: blue[600], mb: '4px' }}>
-            Top Customers
-          </Typography>
-          <Typography variant="body1" fontWeight="100">
-            Best customers
-          </Typography>
-          <TableContainer>
-            <Table sx={{ minWidth: 650, mt: '8px' }} aria-label="best centers">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Customer Name</TableCell>
-                  <TableCell align="right">Address</TableCell>
-                  <TableCell align="right">Success Rate</TableCell>
-                  <TableCell align="right">Total Orders</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {bestCustomers.splice(0, 5).map((row, index) => (
-                  <TableRow key={index}>
-                    <TableCell component="th" scope="row">
-                      {row.name}
-                    </TableCell>
-                    <TableCell align="right">{row.address}</TableCell>
-                    <TableCell align="right">{Math.round(row.success)}%</TableCell>
-                    <TableCell align="right">{row.total}</TableCell>
+        <Container>
+          <Paper sx={{ p: '8px', flex: '1', mb: '24px' }}>
+            <Typography variant="h6" sx={{ color: blue[600], mb: '4px' }}>
+              Today Orders
+            </Typography>
+            <Typography variant="body1" fontWeight="100">
+              Orders requested today
+            </Typography>
+            <TableContainer>
+              <Table sx={{ minWidth: 650, mt: '8px' }} aria-label="todayorder">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Sender</TableCell>
+                    <TableCell>Receiver</TableCell>
+                    <TableCell>Address</TableCell>
+                    <TableCell align="right">Note</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
+                </TableHead>
+                <TableBody>
+                  {todayData.map((row, index) => (
+                    <TableRow key={index}>
+                      <TableCell component="th" scope="row">
+                        {row.id}
+                      </TableCell>
+                      <TableCell align="right">
+                        {users.find((user) => user.email === row.sender).username}
+                      </TableCell>
+                      <TableCell align="right">
+                        {users.find((user) => user.email === row.receiver).username}
+                      </TableCell>
+                      <TableCell align="right">
+                        {users.find((user) => user.email === row.receiver).address}
+                      </TableCell>
+                      <TableCell align="right">{row.note}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+          <Paper sx={{ p: '8px', flex: '1' }}>
+            <Typography variant="h6" sx={{ color: blue[600], mb: '4px' }}>
+              Top Customers
+            </Typography>
+            <Typography variant="body1" fontWeight="100">
+              Best customers
+            </Typography>
+            <TableContainer>
+              <Table sx={{ minWidth: 650, mt: '8px' }} aria-label="best centers">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Customer Name</TableCell>
+                    <TableCell align="right">Address</TableCell>
+                    <TableCell align="right">Success Rate</TableCell>
+                    <TableCell align="right">Total Orders</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {bestCustomers.splice(0, 5).map((row, index) => (
+                    <TableRow key={index}>
+                      <TableCell component="th" scope="row">
+                        {row.name}
+                      </TableCell>
+                      <TableCell align="right">{row.address}</TableCell>
+                      <TableCell align="right">{Math.round(row.success)}%</TableCell>
+                      <TableCell align="right">{row.total}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        </Container>
         <Container sx={{ width: '400px' }}>
-          <Paper sx={{ width: '400px', p: '8px' }}>
+          <Paper sx={{ width: '400px', p: '8px', mb: '24px' }}>
             <Typography variant="h6" align="center" sx={{ mb: '12px', color: blue[600] }}>
               Order Status
             </Typography>
@@ -185,6 +242,24 @@ export default function CenterOverview() {
               ]}
               width={400}
               height={200}
+            />
+          </Paper>
+          <Paper sx={{ width: '400px', p: '8px' }}>
+            <Typography variant="h6" align="center" sx={{ mb: '12px', color: blue[600] }}>
+              Order In 5 Days
+            </Typography>
+            <SparkLineChart
+              showHighlight={true}
+              showTooltip={true}
+              data={[
+                orderIn5Days.FiveDayAgoOrders.length,
+                orderIn5Days.FourDayAgoOrders.length,
+                orderIn5Days.ThreeDayAgoOrders.length,
+                orderIn5Days.TwoDayAgoOrders.length,
+                orderIn5Days.OneDayAgoOrders.length,
+                orderIn5Days.TodayOrders.length
+              ]}
+              height={100}
             />
           </Paper>
         </Container>

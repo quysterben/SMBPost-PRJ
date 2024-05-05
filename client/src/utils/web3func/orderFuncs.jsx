@@ -126,6 +126,94 @@ export const getAllOrders = async (accountAdrress, contract) => {
   }
 };
 
+export const getAllOrdersIn5Days = async (accountAdrress, contract) => {
+  try {
+    const res = await contract.methods.getAllOrders().call({ from: accountAdrress });
+    const orders = res[0].map((order, index) => {
+      return {
+        id: res[1][index],
+        receiver: order.receiverEmail,
+        sender: order.senderEmail,
+        note: order.note,
+        center: order.wayEmails[0],
+        requestedTime: order.histories[0].date
+      };
+    });
+    const FiveDayAgoOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isBefore(moment().subtract(5, 'days'));
+    });
+    const FourDayAgoOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isBefore(moment().subtract(4, 'days'));
+    });
+    const ThreeDayAgoOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isBefore(moment().subtract(3, 'days'));
+    });
+    const TwoDayAgoOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isBefore(moment().subtract(2, 'days'));
+    });
+    const OneDayAgoOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isBefore(moment().subtract(1, 'days'));
+    });
+    const TodayOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isSame(new Date(), 'day');
+    });
+    return {
+      FiveDayAgoOrders,
+      FourDayAgoOrders,
+      ThreeDayAgoOrders,
+      TwoDayAgoOrders,
+      OneDayAgoOrders,
+      TodayOrders
+    };
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const getAllOrdersIn5DaysByEmail = async (accountAdrress, contract, email) => {
+  try {
+    const res = await contract.methods.getOrderByStaffEmail(email).call({ from: accountAdrress });
+    const orders = res[0].map((order, index) => {
+      return {
+        id: res[1][index],
+        receiver: order.receiverEmail,
+        sender: order.senderEmail,
+        note: order.note,
+        center: order.wayEmails[0],
+        requestedTime: order.histories[0].date
+      };
+    });
+    const FiveDayAgoOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isBefore(moment().subtract(5, 'days'));
+    });
+    const FourDayAgoOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isBefore(moment().subtract(4, 'days'));
+    });
+    const ThreeDayAgoOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isBefore(moment().subtract(3, 'days'));
+    });
+    const TwoDayAgoOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isBefore(moment().subtract(2, 'days'));
+    });
+    const OneDayAgoOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isBefore(moment().subtract(1, 'days'));
+    });
+    const TodayOrders = orders.filter((order) => {
+      return moment(order.requestedTime).isSame(new Date(), 'day');
+    });
+    return {
+      FiveDayAgoOrders,
+      FourDayAgoOrders,
+      ThreeDayAgoOrders,
+      TwoDayAgoOrders,
+      OneDayAgoOrders,
+      TodayOrders
+    };
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const getOrdersByStaffEmail = async (accountAdrress, contract, email) => {
   try {
     const res = await contract.methods.getOrderByStaffEmail(email).call({ from: accountAdrress });

@@ -6,7 +6,8 @@ import { useEffect, useState } from 'react';
 import {
   getAllOrders,
   getOrdersByCustomerEmail,
-  getOrdersByStaffEmail
+  getOrdersByStaffEmail,
+  getAllOrdersIn5Days
 } from '../../../utils/web3func/orderFuncs';
 import requestAPI from '../../../utils/fetchAPI';
 
@@ -21,7 +22,7 @@ import {
   TableCell,
   TableBody
 } from '@mui/material';
-import { PieChart } from '@mui/x-charts';
+import { PieChart, SparkLineChart } from '@mui/x-charts';
 import TotalCount from './components/TotalCount';
 import { blue } from '@mui/material/colors';
 
@@ -50,6 +51,9 @@ export default function Overview() {
   //  Best Centers
   const [bestCenters, setBestCenters] = useState([]);
   const [bestCustomers, setBestCustomers] = useState([]);
+
+  //  Orders in 5 days
+  const [orderIn5Days, setOrderIn5Days] = useState();
 
   //  fetchData
   useEffect(() => {
@@ -132,6 +136,11 @@ export default function Overview() {
             if (isToday) setTodayOrders((prev) => prev + 1);
           }
         });
+
+        const orderIn5Days = await getAllOrdersIn5Days(account, contract);
+        setOrderIn5Days(orderIn5Days);
+
+        console.log(orderIn5Days);
       } catch (err) {
         console.log(err);
       }
@@ -232,7 +241,7 @@ export default function Overview() {
           </Paper>
         </Container>
         <Container sx={{ width: '400px' }}>
-          <Paper sx={{ width: '400px', p: '8px' }}>
+          <Paper sx={{ width: '400px', p: '8px', mb: '24px' }}>
             <Typography variant="h6" align="center" sx={{ mb: '12px', color: blue[600] }}>
               Order Status
             </Typography>
@@ -250,6 +259,24 @@ export default function Overview() {
               ]}
               width={400}
               height={200}
+            />
+          </Paper>
+          <Paper sx={{ width: '400px', p: '8px' }}>
+            <Typography variant="h6" align="center" sx={{ mb: '12px', color: blue[600] }}>
+              Order In 5 Days
+            </Typography>
+            <SparkLineChart
+              showHighlight={true}
+              showTooltip={true}
+              data={[
+                orderIn5Days.FiveDayAgoOrders.length,
+                orderIn5Days.FourDayAgoOrders.length,
+                orderIn5Days.ThreeDayAgoOrders.length,
+                orderIn5Days.TwoDayAgoOrders.length,
+                orderIn5Days.OneDayAgoOrders.length,
+                orderIn5Days.TodayOrders.length
+              ]}
+              height={100}
             />
           </Paper>
         </Container>
