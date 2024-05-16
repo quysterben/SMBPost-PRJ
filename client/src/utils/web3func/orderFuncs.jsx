@@ -130,6 +130,7 @@ export const getAllOrdersIn5Days = async (accountAdrress, contract) => {
   try {
     const res = await contract.methods.getAllOrders().call({ from: accountAdrress });
     const orders = res[0].map((order, index) => {
+      console.log(order.histories[0].date);
       return {
         id: res[1][index],
         receiver: order.receiverEmail,
@@ -140,19 +141,19 @@ export const getAllOrdersIn5Days = async (accountAdrress, contract) => {
       };
     });
     const FiveDayAgoOrders = orders.filter((order) => {
-      return moment(order.requestedTime).isBefore(moment().subtract(5, 'days'));
+      return moment(order.requestedTime).isSame(moment().subtract(5, 'days'), 'day');
     });
     const FourDayAgoOrders = orders.filter((order) => {
-      return moment(order.requestedTime).isBefore(moment().subtract(4, 'days'));
+      return moment(order.requestedTime).isSame(moment().subtract(4, 'days'), 'day');
     });
     const ThreeDayAgoOrders = orders.filter((order) => {
-      return moment(order.requestedTime).isBefore(moment().subtract(3, 'days'));
+      return moment(order.requestedTime).isSame(moment().subtract(3, 'days'), 'day');
     });
     const TwoDayAgoOrders = orders.filter((order) => {
-      return moment(order.requestedTime).isBefore(moment().subtract(2, 'days'));
+      return moment(order.requestedTime).isSame(moment().subtract(2, 'days'), 'day');
     });
     const OneDayAgoOrders = orders.filter((order) => {
-      return moment(order.requestedTime).isBefore(moment().subtract(1, 'days'));
+      return moment(order.requestedTime).isSame(moment().subtract(1, 'days'), 'day');
     });
     const TodayOrders = orders.filter((order) => {
       return moment(order.requestedTime).isSame(new Date(), 'day');
@@ -184,19 +185,19 @@ export const getAllOrdersIn5DaysByEmail = async (accountAdrress, contract, email
       };
     });
     const FiveDayAgoOrders = orders.filter((order) => {
-      return moment(order.requestedTime).isBefore(moment().subtract(5, 'days'));
+      return moment(order.requestedTime).isSame(moment().subtract(5, 'days'), 'day');
     });
     const FourDayAgoOrders = orders.filter((order) => {
-      return moment(order.requestedTime).isBefore(moment().subtract(4, 'days'));
+      return moment(order.requestedTime).isSame(moment().subtract(4, 'days'), 'day');
     });
     const ThreeDayAgoOrders = orders.filter((order) => {
-      return moment(order.requestedTime).isBefore(moment().subtract(3, 'days'));
+      return moment(order.requestedTime).isSame(moment().subtract(3, 'days'), 'day');
     });
     const TwoDayAgoOrders = orders.filter((order) => {
-      return moment(order.requestedTime).isBefore(moment().subtract(2, 'days'));
+      return moment(order.requestedTime).isSame(moment().subtract(2, 'days'), 'day');
     });
     const OneDayAgoOrders = orders.filter((order) => {
-      return moment(order.requestedTime).isBefore(moment().subtract(1, 'days'));
+      return moment(order.requestedTime).isSame(moment().subtract(1, 'days'), 'day');
     });
     const TodayOrders = orders.filter((order) => {
       return moment(order.requestedTime).isSame(new Date(), 'day');

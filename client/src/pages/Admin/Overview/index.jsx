@@ -141,6 +141,7 @@ export default function Overview() {
         });
 
         const orderIn5Days = await getAllOrdersIn5Days(account, contract);
+        console.log(orderIn5Days);
         setOrderIn5Days(orderIn5Days);
       } catch (err) {
         console.log(err);
