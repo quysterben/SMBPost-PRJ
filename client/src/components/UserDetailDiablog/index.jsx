@@ -43,7 +43,9 @@ export default function UserDetailDiablog(props) {
           );
         } else {
           res = await getOrdersByStaffEmail(account, contract, user.email);
-          setOrderCount(res.length);
+          setOrderCount(
+            res.requestedRes.length + res.intransitRes.length + res.deliveredRes.length
+          );
         }
         setIsLoading(false);
       } catch (err) {
