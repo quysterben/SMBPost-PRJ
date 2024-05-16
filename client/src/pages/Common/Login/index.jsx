@@ -71,7 +71,7 @@ export default function LoginPage() {
       } else if (res.data.role === 'shippingCenter') {
         navigate('/center/overview');
       } else if (res.data.role === 'storehouse') {
-        navigate('/storehouse/overview');
+        navigate('/storehouse/orders');
       } else if (res.data.role === 'customer') {
         navigate('/verify');
       }
