@@ -84,6 +84,8 @@ export default function CenterOverview() {
             ]);
           }
         }
+        setBestCustomers((prev) => prev.sort((a, b) => b.total - a.total));
+        setBestCustomers((prev) => prev.sort((a, b) => b.success - a.success));
       } catch (err) {
         console.error(err);
       }
@@ -136,7 +138,6 @@ export default function CenterOverview() {
         <Loader />
       </Container>
     );
-  else console.log(todayData);
 
   return (
     <Container>

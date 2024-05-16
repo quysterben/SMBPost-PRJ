@@ -109,7 +109,10 @@ export default function Overview() {
             ]);
           }
         }
+        setBestCenters((prev) => prev.sort((a, b) => b.total - a.total));
         setBestCenters((prev) => prev.sort((a, b) => b.success - a.success));
+        setBestCustomers((prev) => prev.sort((a, b) => b.total - a.total));
+        setBestCustomers((prev) => prev.sort((a, b) => b.success - a.success));
       } catch (err) {
         console.log(err);
       }
@@ -140,7 +143,6 @@ export default function Overview() {
         const orderIn5Days = await getAllOrdersIn5Days(account, contract);
         setOrderIn5Days(orderIn5Days);
 
-        console.log(orderIn5Days);
       } catch (err) {
         console.log(err);
       }

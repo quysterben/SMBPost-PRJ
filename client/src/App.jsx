@@ -23,7 +23,6 @@ function App() {
 
   useEffect(() => {
     const loadProvider = async () => {
-      console.log('in');
       try {
         const provider = await detectEthereumProvider();
         const web3 = new Web3(provider);

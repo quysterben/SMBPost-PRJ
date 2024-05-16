@@ -85,7 +85,6 @@ export default function StorehouseOrderDetail() {
     try {
       setIsLoadingTransfer(true);
       if (trackerDatas[trackerDatas.length - 1] === trackerDatas[1 + historyDatas.length]) {
-        console.log('transferToCustomer');
         await transferToCustomer(account, contract, {
           orderID: id,
           customerEmail: trackerDatas[trackerDatas.length - 1]
