@@ -159,7 +159,7 @@ class AuthController {
 }
 
 const createAccessToken = (payload: jwt.JwtPayload) => {
-  return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '1h' })
+  return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: '20d' })
 }
 
 const createRefreshToken = (payload: jwt.JwtPayload) => {

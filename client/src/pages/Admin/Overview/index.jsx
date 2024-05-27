@@ -151,7 +151,7 @@ export default function Overview() {
     fetchUsers().then(() => fetchAllOrders().then(() => setLoading(false)));
   }, []);
 
-  if (loading)
+  if (loading || account === '' || contract === '')
     return (
       <Container
         sx={{
