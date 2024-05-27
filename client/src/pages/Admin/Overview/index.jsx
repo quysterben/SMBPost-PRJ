@@ -75,7 +75,7 @@ export default function Overview() {
                   orderPerCenter.deliveredRes.length +
                   orderPerCenter.canceledRes.length,
                 success:
-                  (orderPerCenter.canceledRes.length /
+                  (orderPerCenter.deliveredRes.length /
                     (orderPerCenter.requestedRes.length +
                       orderPerCenter.intransitRes.length +
                       orderPerCenter.deliveredRes.length +
